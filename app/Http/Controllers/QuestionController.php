@@ -4,6 +4,7 @@ use App\Models\Question;
 use App\Models\Answer;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Wechat;
 use Request;
 
 class QuestionController extends Controller {
@@ -13,21 +14,9 @@ class QuestionController extends Controller {
     }
 
     public function test() {
-        $user = new User();
-        $user->face = "http://imgsrc.baidu.com/forum/w%3D580/sign=df4215dfa4efce1bea2bc8c29f50f3e8/bcb5a212c8fcc3ce8c509f1a9145d688d53f20a8.jpg";
-        $user->wechat = "测试导师";
-        $user->title = "测试头衔";
-        $user->introduction = "这个程序员很懒，都用了同一条介绍";
-        $user->isteacher = 1;
-        $user->save();
-        $teacher = new Teacher;
-        $teacher->qrcode = "test";
-        $teacher->prize = 2.22;
-        $teacher->invite = "test";
-        $teacher->user_id = 2;
-        $teacher->answernum = 0; 
-        $teacher->user_id = $user->id;
-        $teacher->save();
+        $wechat = new Wechat();
+        $signPackage = $wechat->getSignPackage();
+        return $this->response(0, $signPackage);
     }
 
     public function getTopic() {

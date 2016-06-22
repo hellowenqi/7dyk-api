@@ -1,0 +1,141 @@
+<?php namespace App;
+
+use Cache;
+use Config;
+use Session;
+use Redirect;
+use Curl\Curl;
+use App\Models\BaseModel;
+
+class Wechat extends BaseModel {
+    private $appId;
+    private $appSecret;
+	
+	public function __construct() {
+		parent::__construct();
+        $this->appId = Config::get("wechat.appid");
+        $this->appSecret = Config::get("wechat.appsecret");
+	}
+
+    public function getQRCode() {
+        $curl = new Curl();
+        $token = $this->getToken();
+
+        $curl->post("https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=$token", json_encode(array(
+            'action_name'   =>  'QR_LIMIT_STR_SCENE',
+            'action_info'   =>  array(
+                'scene' =>  array(
+                    'scene_str'  => "7dyk"
+                )
+            )
+        ), JSON_UNESCAPED_UNICODE));
+        dd($curl->response);
+
+        $ticket = urlencode($curl->response->ticket);
+
+        $curl->get("https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=$ticket");
+        $response = $curl->response;
+        return $response;
+    }
+
+    public function getSignPackage() {
+        $ticket = $this->getTicket();
+        $appid = $this->appId;
+
+        // 注意 URL 一定要动态获取，不能 hardcode.
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        $url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+        $url = "http://h5app.7dyk.com/ama/7dyk/";
+
+        $timestamp = time();
+        $nonceStr = $this->createNonceStr();
+
+        // 这里参数的顺序要按照 key 值 ASCII 码升序排序
+        $string = "jsapi_ticket=$ticket&noncestr=$nonceStr&timestamp=$timestamp&url=$url";
+
+        $signature = sha1($string);
+
+        $signPackage = array(
+            "appId"     => $appid,
+            "nonceStr"  => $nonceStr,
+            "timestamp" => $timestamp,
+            "url"       => $url,
+            "signature" => $signature,
+            "rawString" => $string,
+        );
+        return $signPackage; 
+    }
+
+    public function isLogin() {
+        return Session::has('openid');
+    }
+
+    public function loginWechat() {
+        $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        Session::put("redirect", $url);
+
+        $appid = $this->appId;
+        $curl = new Curl();
+        $login_url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=$appid&redirect_uri=$url&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
+
+        return Redirect::to($login_url);
+    }
+
+	private function getToken() {
+		if(Cache::has('token')) {
+		    return Cache::get('token');
+		} else {
+			return $this->refreshToken();
+		}
+	}
+
+	private function refreshToken() {
+		$appid = $this->appId;
+		$appsecret = $this->appSecret;
+        $curl = new Curl();
+
+		//取得当前token
+        $curl->get('https://api.weixin.qq.com/cgi-bin/token', array(
+            'grant_type'    =>  'client_credential',
+            'appid'         =>  $appid,
+            'secret'        =>  $appsecret,
+        ));
+        $response = $curl->response;
+
+        //将token存入Cache
+        Cache::put('token', $response->access_token, 110);
+        return $response->access_token;
+	}
+
+    private function getTicket() {
+        if(Cache::has('ticket')) {
+            return Cache::get('ticket');
+        } else {
+            return $this->refreshTicket();
+        }
+    }
+
+    private function refreshTicket() {
+        $curl = new Curl();
+        $token = $this->getToken();
+
+        //取得当前ticket
+        $curl->get("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=$token&type=jsapi");
+        $response = $curl->response;
+
+        //将ticket存入Cache
+        Cache::put('ticket', $response->ticket, 110);
+        return $response->ticket;
+    }
+
+    //生成随机字符串
+    private function createNonceStr($length = 16) {
+        $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $str = "";
+        for ($i = 0; $i < $length; $i++) {
+            $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
+        }
+        return $str;
+    }
+
+}
