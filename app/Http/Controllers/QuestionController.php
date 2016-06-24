@@ -112,6 +112,7 @@ class QuestionController extends Controller {
 
     public function addQuestion()
     {
+
         $data['prize'] = Request::input('prize');//接值
         $data['content'] = Request::input('content');
         $data['time'] = Request::input('time');
@@ -133,33 +134,45 @@ class QuestionController extends Controller {
     //我问的问题
     public function myQuestion()
     {
-        $user_id = session("user_id");//接值
-        $arr = DB::table('question')->where('question_user_id',$user_id)->get();//打印数组
-        $myquestion = json_encode($arr);//josn格式
-        //返回结果
-        if($myquestion)
-        {
-            return $this->response(0);
-        }else
-        {
-            return $this->response(100);
-        }
+        if(Request::has('page') && Request::has('number')) {
+            $page = Request::get('page');
+            $number = Request::get('number');
+            $index = ($page - 1) * $number;
 
+            $user_id = 1;
+            //$user_id = session("user_id");//接值
+            $arr = DB::table('question')->where('question_user_id', $user_id)->skip($index)->take($number)->get();//打印数组
+            $myquestion = json_encode($arr);//josn格式
+            //返回结果
+            if ($myquestion) {
+                return $this->response(0);
+                {
+                    return $this->response(100);
+                }
+
+            }
+        }
     }
     //问我的问题
     public function myAnswer()
     {
-        $user_id = session("user_id");//接值
-        $arr = DB::table('question')->where('answer_user_id',$user_id)->get();//打印数组
-        //返回结果
-        if($arr)
-        {
-            echo json_encode($arr);//josn格式
-            return $this->response(0);
+        if(Request::has('page') && Request::has('number')) {
+            $page = Request::get('page');
+            $number = Request::get('number');
+            $index = ($page - 1) * $number;
 
-        }else
-        {
-            return $this->response(100);
+            $user_id = 1;
+            //$user_id = session("user_id");//接值
+
+            $arr = DB::table('question')->where('question_user_id', $user_id)->skip($index)->take($number)->get();//打印数组
+
+            //返回结果
+            if ($arr) {
+                echo json_encode($arr);//josn格式
+                return $this->response(0);
+            } else {
+                return $this->response(100);
+            }
         }
     }
 
