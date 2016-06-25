@@ -71,14 +71,50 @@ class Wechat extends BaseModel {
     }
 
     public function loginWechat() {
-        $url = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        Session::put("redirect", $url);
+        $url = urlencode("http://h5app.7dyk.com/dev/wq/public/api/v1/code");
 
         $appid = $this->appId;
-        $curl = new Curl();
         $login_url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=$appid&redirect_uri=$url&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
 
         return Redirect::to($login_url);
+    }
+
+    public function getOpenid($code) {
+        if(Cache::has('openid')) {
+            $openid = Cache::get('openid');
+            return $openid;
+        }
+        $appid = $this->appId;
+        $appsecret = $this->appSecret;
+        $curl = new Curl();
+        $code_url = "https://api.weixin.qq.com/sns/oauth2/access_token";
+
+        //取得token
+        $curl->get($code_url, array(
+            'appid'         =>  $appid,
+            'secret'        =>  $appsecret,
+            'code'          =>  $code,
+            'grant_type'    =>  'authorization_code',
+        ));
+        $response = json_decode($curl->response);
+        Cache::put('access_token', $response->access_token, 110);
+        Cache::put('opneid', $response->openid, 110);
+        //这里没有用到refresh_token,用户量大以后可以使用
+
+        return $response->openid;
+    }
+
+    public function getUserinfo($access_token, $openid) {
+        $curl = new Curl();
+        $url = "https://api.weixin.qq.com/sns/userinfo";
+
+        $curl->get($url, array(
+            'access_token'      =>  $access_token,
+            'openid'            =>  $openid,
+            'lang'              =>  'zh_CN',
+        ));
+        $response = json_decode($curl->response);
+        return $response;
     }
 
 	private function getToken() {

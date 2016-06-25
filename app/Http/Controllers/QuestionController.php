@@ -4,8 +4,11 @@ use App\Models\Question;
 use App\Models\Answer;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Models\Listen;
+use App\Code;
 use App\Wechat;
 use Request;
+use Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
@@ -43,7 +46,7 @@ class QuestionController extends Controller {
     public function test() {
         $wechat = new Wechat();
         $signPackage = $wechat->getSignPackage();
-        return $this->response(0, $signPackage);
+        return Code::response(0, $signPackage);
     }
 
     public function getTopic() {
@@ -74,9 +77,9 @@ class QuestionController extends Controller {
                 );
                 $datas[] = $data;
             }
-            return $this->response(0, $datas);
+            return Code::response(0, $datas);
         } else {
-            return $this->response(100);
+            return Code::response(100);
         }
     }
 
@@ -101,33 +104,30 @@ class QuestionController extends Controller {
                     'answer_dislike'        =>  $question->answer->dislike,
                     'answer_audio'          =>  $question->answer->audio,
                 );
-                return $this->response(0, $data);
+                return Code::response(0, $data);
             } else {
-                return $this->response(201);
+                return Code::response(201);
             }
         } else {
-            return $this->response(100);
+            return Code::response(100);
         }
     }
 
     public function addQuestion()
     {
-
-        $data['prize'] = Request::input('prize');//接值
-        $data['content'] = Request::input('content');
-        $data['time'] = Request::input('time');
-        $data['isanswered'] = Request::input('isanswered');
-        $data['weight'] = Request::input('weight');
-        $data['answer_id'] =  Request::input('answer_id');
-        $data['answer_user_id'] =  Request::input('answer_user_id');
-        $data['question_user_id'] =  Request::input('question_user_id');
-        $re = DB::table('question')->insert($data);
-        //返回结果
-        if($re)
-        {
+        if(Request::has('prize') && Request::has('content') && Request::has('answer_user_id') && Request::has('question_user_id')) {
+            $data['prize'] = Request::input('prize');//接值
+            $data['content'] = Request::input('content');
+            $data['answer_user_id'] =  Request::input('answer_user_id');
+            $data['question_user_id'] =  Request::input('question_user_id');
+            $data['isanswered'] = 0;
+            $data['weight'] = 0;
+            $data['answer_id'] =  0;
+            $data['time'] = date("Y-m-d H:i:s", time());
+            $re = DB::table('question')->insert($data);
+            //返回结果
             return $this->response(0,$data);
-        }else
-        {
+        } else {
             return $this->response(100);
         }
     }
@@ -138,19 +138,15 @@ class QuestionController extends Controller {
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
+            $user_id = Session::get('user_id');
 
-            $user_id = 1;
-            //$user_id = session("user_id");//接值
-            $arr = DB::table('question')->where('question_user_id', $user_id)->skip($index)->take($number)->get();//打印数组
-            $myquestion = json_encode($arr);//josn格式
+            $arr = DB::table('question')->where('question_user_id', $user_id)->orderBy('time', 'desc')->skip($index)->take($number)->get();
             //返回结果
-            if ($myquestion) {
-                return $this->response(0);
-                {
-                    return $this->response(100);
-                }
-
+            if ($arr) {
+                return Code::response(0, $arr);
             }
+        } else {
+            return Code::response(100);
         }
     }
     //问我的问题
@@ -160,25 +156,36 @@ class QuestionController extends Controller {
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
+            $user_id = Session::get('user_id');
 
-            $user_id = 1;
-            //$user_id = session("user_id");//接值
-
-            $arr = DB::table('question')->where('question_user_id', $user_id)->skip($index)->take($number)->get();//打印数组
+            $arr = DB::table('question')->where('answer_user_id', $user_id)->skip($index)->take($number)->get();//打印数组
 
             //返回结果
             if ($arr) {
-                echo json_encode($arr);//josn格式
-                return $this->response(0);
-            } else {
-                return $this->response(100);
+                return $this->response(0, $arr);
             }
+        } else {
+            return $this->response(100);
         }
     }
-
     //听过回答的人数
-    public  function myListen()
+    public function myListen()
     {
+        if(Request::has('page') && Request::has('number')) {
+            $page = Request::get('page');
+            $number = Request::get('number');
+            $index = ($page - 1) * $number;
+            $user_id = Session::get('user_id');
+
+            $arr = DB::table('question')->where('answer_user_id', $user_id)->skip($index)->take($number)->get();//打印数组
+
+            //返回结果
+            if ($arr) {
+                return $this->response(0, $arr);
+            }
+        } else {
+            return $this->response(100);
+        }
         $user_id = session("user_id");
         $where['answer_user_id']=$user_id;
         $where['listen']=1;
@@ -192,11 +199,4 @@ class QuestionController extends Controller {
             return $this->response(100);
         }
     }
-
-
-
-
-
-
-
 }
