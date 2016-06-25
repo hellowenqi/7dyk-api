@@ -2,7 +2,12 @@
 
 use App\Models\Teacher;
 use App\Models\User;
+use App\Code;
+use App\Wechat;
+use Session;
 use Request;
+use Redirect;
+use Cache;
 
 class UserController extends Controller {
 
@@ -23,43 +28,120 @@ class UserController extends Controller {
                     'user_name'         =>  $teacher->user->wechat,
                     'user_title'        =>  $teacher->user->title,
                     'user_face'         =>  $teacher->user->face,
-                    'user_prize'        =>  $teacher->prize,
+                    'teacher_prize'     =>  $teacher->prize,
                     'answer_number'     =>  $teacher->answernum,
                 );
                 $datas[] = $data;
             }
-            return $this->response(0, $datas);
+            return Code::response(0, $datas);
         } else {
-            return $this->response(100);
+            return Code::response(100);
         }
     }
 
     public function getUserinfo() {
         if(Request::has('id')) {
             $id = Request::get('id');
-            $user = User::with('teacher')->where('id', $id)->get();
-            dd($user);
+            $user = User::with('teacher')->where('id', $id)->first();
+            if(isset($user)) {
+                if($user->isteacher) {
+                    $data = array(
+                        'is_teacher'        =>  $user->isteacher,
+                        'user_id'           =>  $user->id,
+                        'user_name'         =>  $user->wechat,
+                        'user_title'        =>  $user->title,
+                        'user_face'         =>  $user->face,
+                        'user_introduction' =>  $user->introduction,
+                        'teacher_income'    =>  $user->teacher->income,
+                        'teacher_prize'     =>  $user->teacher->prize,
+                        'listen_num'        =>  $user->teacher->listennum,
+                        'answer_num'        =>  $user->teacher->answernum,
+                    );
+                } else {
+                    $data = array(
+                        'is_teacher'        =>  $user->isteacher,
+                        'user_id'           =>  $user->id,
+                        'user_name'         =>  $user->wechat,
+                        'user_title'        =>  $user->title,
+                        'user_face'         =>  $user->face,
+                        'user_introduction' =>  $user->introduction,
+                    );
+                }
+                return Code::response(0, $data);
+            } else {
+                return Code::response(100);
+            }
         }
     }
 
-    public function response($errCode, $datas = array()) {
-        header("Access-Control-Allow-Origin:*");
-        header("Access-Control-Allow-Methods:GET,POST");
-        header("Access-Control-Allow-Headers: Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With");
-        if($errCode == 100) {
-            $json = array(
-                'errCode'   =>  100,
-                'msg'       =>  '参数错误',
-                'data'      =>  $datas,
-            );
-        } else {
-            $json = array(
-                'errCode'   =>  0,
-                'msg'       =>  'ok',
-                'data'      =>  $datas,
-            );
+    public function getUsernow() {
+        $id = 1;
+        $user = User::with('teacher')->where('id', $id)->first();
+        if(isset($user)) {
+            if($user->isteacher) {
+                $data = array(
+                    'is_teacher'        =>  $user->isteacher,
+                    'user_id'           =>  $user->id,
+                    'user_name'         =>  $user->wechat,
+                    'user_title'        =>  $user->title,
+                    'user_face'         =>  $user->face,
+                    'user_introduction' =>  $user->introduction,
+                    'teacher_income'    =>  $user->teacher->income,
+                    'teacher_prize'     =>  $user->teacher->prize,
+                    'listen_num'        =>  $user->teacher->listennum,
+                    'answer_num'        =>  $user->teacher->answernum,
+                );
+            } else {
+                $data = array(
+                    'is_teacher'        =>  $user->isteacher,
+                    'user_id'           =>  $user->id,
+                    'user_name'         =>  $user->wechat,
+                    'user_title'        =>  $user->title,
+                    'user_face'         =>  $user->face,
+                    'user_introduction' =>  $user->introduction,
+                );
+            }
         }
-        return json_encode($json, JSON_UNESCAPED_UNICODE+JSON_UNESCAPED_SLASHES);
+        return Code::response(0, $data);
+    }
+
+    public function auth() {
+        $wechat = new Wechat;
+        if(Request::has('redirect')) {
+            $redirect = Request::get('redirect');
+        } else {
+            $redirect = "http://www.baidu.com";
+        }
+        Session::put('redirect', $redirect);
+        return $wechat->loginWechat("http://h5app.7dyk.com/dev/wq/public/api/v1/code");
+    }
+
+    public function code() {
+        $wechat = new Wechat;
+        $redirect = Session::get('redirect');
+        if(Request::has('code')) {
+            $code = Request::get('code');
+            $openid = $wechat->getOpenid($code);
+            $user = User::where('openid', $openid)->first();
+            if(isset($user)) {
+                Session::put('user_id', $user->id);
+            } else {
+                $access_token = Cache::get('access_token');
+                $info = $wechat->getUserinfo($access_token, $openid);
+                $user = new User;
+                $user->face = $info->headimgurl;
+                $user->wechat = $info->nickname;
+                $user->title = "";
+                $user->introduction = "";
+                $user->regist_time = date("Y-m-d H:i:s", time());
+                $user->login_time = date("Y-m-d H:i:s", time());
+                $user->openid = $openid;
+                $user->isteacher = 0;
+                $user->save();
+                Session::put('user_id', $user->id);
+            }
+        }
+        return Redirect::to($redirect);
     }
 
 }
