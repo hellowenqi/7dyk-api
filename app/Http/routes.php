@@ -28,6 +28,7 @@ Route::group(['prefix' => 'api'], function() {
                 Route::any('myquestion', 'QuestionController@myQuestion');
                 Route::any('myanswer', 'QuestionController@myAnswer');
                 Route::any('mylisten', 'QuestionController@myListen');
+                Route::any('dislike', 'QuestionController@dislike');
             });
             Route::group(['prefix' => 'user'], function() {
                 Route::any('getteacher', 'UserController@getTeacher');
