@@ -19,7 +19,7 @@ Route::post('question', 'QuestionController@index');
 
 Route::group(['prefix' => 'api'], function() {
     Route::group(['prefix' => 'v1'], function() {
-        Route::group(['middleware' => 'wechatauth'], function() {
+        //Route::group(['middleware' => 'wechatauth'], function() {
             Route::group(['prefix' => 'question'], function() {
                 Route::any('test', 'QuestionController@test');
                 Route::any('gettopic', 'QuestionController@getTopic');
@@ -35,7 +35,7 @@ Route::group(['prefix' => 'api'], function() {
                 Route::any('getuserinfo', 'UserController@getUserinfo');
                 Route::any('getusernow', 'UserController@getUsernow');
             });
-        });
+        //});
         Route::any('auth', 'UserController@auth');
         Route::any('code', 'UserController@code');
     });

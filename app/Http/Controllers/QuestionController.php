@@ -147,12 +147,15 @@ class QuestionController extends Controller
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
-            $user_id = Session::get('user_id');
+            //$user_id = Session::get('user_id');
+            $user_id = 1;
 
             $arr = DB::table('question')->where('question_user_id', $user_id)->orderBy('time', 'desc')->skip($index)->take($number)->get();
             //返回结果
             if ($arr) {
                 return Code::response(0, $arr);
+            } else {
+                return Code::response(0);
             }
         } else {
             return Code::response(100);
@@ -166,13 +169,16 @@ class QuestionController extends Controller
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
-            $user_id = Session::get('user_id');
+            //$user_id = Session::get('user_id');
+            $user_id = 1;
 
             $arr = DB::table('question')->where('answer_user_id', $user_id)->skip($index)->take($number)->get();//打印数组
 
             //返回结果
             if ($arr) {
                 return $this->response(0, $arr);
+            } else {
+                return $this->response(0);
             }
         } else {
             return $this->response(100);
