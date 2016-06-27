@@ -182,6 +182,7 @@ class QuestionController extends Controller
     //听过的问提
     public function myListen()
     {
+        
         if (Request::has('page') && Request::has('number')) {
             $page = Request::get('page');
             $number = Request::get('number');
@@ -209,12 +210,11 @@ class QuestionController extends Controller
     return $this->response(100);
     }
 
-    //不喜欢的人数
-    public function dislike(){
-
+    //喜欢的人数
+    public function like(){
         $answer_id = Request::input("answer_id");
-        $like_answer = DB::table('answer')->where('id',1)->get();
-        print_r($like_answer);
+        $like_answer = DB::update("update answer set 'like' = 'like'+1 where id=$answer_id");
+        //print_r($like_answer);
         if (empty($listen)) {
             return $this->response(0);
         } else{
@@ -222,7 +222,20 @@ class QuestionController extends Controller
         }
 
     }
-    
+    //不喜欢的人数
+    public function dislike(){
+        $answer_id = Request::input("answer_id");
+        $like_answer = DB::update("update answer set 'dislike' = 'dislike'+1 where id=$answer_id");
+        if (empty($listen)) {
+            return $this->response(0);
+        } else{
+            return $this->response(100);
+        }
+    }
+
+
+
+
 
 
 
