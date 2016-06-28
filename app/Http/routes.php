@@ -31,6 +31,8 @@ Route::group(['prefix' => 'api'], function() {
                 Route::any('dislike', 'QuestionController@dislike');
                 Route::any('like', 'QuestionController@like');
                 Route::any('weight', 'QuestionController@weight');
+                Route::any('teacher_question', 'QuestionController@teacher_question');
+
 
 
 
