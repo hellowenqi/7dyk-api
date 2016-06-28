@@ -215,7 +215,7 @@ class QuestionController extends Controller
     return $this->response(100);
     }
 }
-    //喜欢的人数
+
     public function like(){
         $answer_id = session("id");
         $like_answer = DB::update("update answer set `like`=`like`+1 where id='answer_id'");
@@ -227,7 +227,7 @@ class QuestionController extends Controller
         }
 
     }
-    //不喜欢的人数
+
     public function dislike(){
         $answer_id = session("id");
         $like_answer = DB::update("update answer set `dislike`=`dislike`+1 where id='answer_id'");
@@ -238,31 +238,35 @@ class QuestionController extends Controller
             return $this->response(100);
         }
     }
-    //排序方法
+
+
+    //计算权重
     public function weight()
     {
-        $user_id = session("id");
         $question_id = Request::input('question_id');
         $res1 = DB::select("select * from question left join answer on question.id=answer.question_id where question.id=3");
 
         $quanzhong = 0.6*$res1[0]->listen-0.4*$res1[0]->dislike;
         $res = DB::update("update question set weight=weight+$quanzhong where id=3");
-        //echo $quanzhong;die;
-        if (empty($like_answer)) {
+        if (empty($res)) {
             return $this->response(0);
         } else{
             return $this->response(100);
         }
     }
-    //查询当前导师的问题
+
+
+    //查询当前问题的权重
     public function teacher_question()
     {
 
         $res = DB::table('question')->orderBy('weight','desc')->get();
-        print_r($res);
+        if (empty($res)) {
+            return $this->response(0);
+        } else{
+            return $this->response(100);
+        }
     }
-
-
 
 
 
