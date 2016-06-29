@@ -20,6 +20,7 @@ class QuestionController extends Controller
     {
         return;
     }
+<<<<<<< Updated upstream
 
     public function response($errCode, $datas = array())
     {
@@ -46,6 +47,49 @@ class QuestionController extends Controller
             );
         }
         return json_encode($json, JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES);
+=======
+    public function response($errCode, $datas = array()) {
+        header("Access-Control-Allow-Origin:*");
+        header("Access-Control-Allow-Methods:GET,POST");
+        header("Access-Control-Allow-Headers: Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With");
+        if($errCode == 100) {
+            $json = array(
+                'errCode'   =>  100,
+                'msg'       =>  '参数错误',
+                'data'      =>  $datas,
+            );
+        } else if($errCode == 201) {
+            $json = array(
+                'errCode'   =>  201,
+                'msg'       =>  '没有查询到问题',
+                'data'      =>  $datas,
+            );
+        } else {
+            $json = array(
+                'errCode'   =>  0,
+                'msg'       =>  'ok',
+                'data'      =>  $datas,
+            );
+        }
+        return json_encode($json, JSON_UNESCAPED_UNICODE+JSON_UNESCAPED_SLASHES);
+    }
+    public function test() {
+        $user = new User();
+        $user->face = "http://imgsrc.baidu.com/forum/w%3D580/sign=df4215dfa4efce1bea2bc8c29f50f3e8/bcb5a212c8fcc3ce8c509f1a9145d688d53f20a8.jpg";
+        $user->wechat = "测试导师";
+        $user->title = "测试头衔";
+        $user->introduction = "这个程序员很懒，都用了同一条介绍";
+        $user->isteacher = 1;
+        $user->save();
+        $teacher = new Teacher;
+        $teacher->qrcode = "test";
+        $teacher->prize = 2.22;
+        $teacher->invite = "test";
+        $teacher->user_id = 2;
+        $teacher->answernum = 0; 
+        $teacher->user_id = $user->id;
+        $teacher->save();
+>>>>>>> Stashed changes
     }
 
     public function test()
@@ -70,6 +114,7 @@ class QuestionController extends Controller
                     $prize = $teacher->prize;
                 }
                 $data = array(
+<<<<<<< Updated upstream
                     'question_id' => $question->id,
                     'question_content' => $question->content,
                     'question_prize' => $question->prize,
@@ -81,6 +126,19 @@ class QuestionController extends Controller
                     'answer_listen' => $question->answer->listen,
                     'answer_dislike' => $question->answer->dislike,
                     'answer_audio' => $question->answer->audio,
+=======
+                    'question_id'           =>  $question->id,
+                    'question_content'      =>  $question->content,
+                    'question_prize'        =>  $question->prize,
+                    'teacher_id'             =>  $question->teacher->id,
+                    'teacher_name'          =>  $question->teacher->wechat,
+                    'teacher_title'         =>  $question->teacher->title,
+                    'teacher_face'          =>  $question->teacher->face,
+                    'teacher_prize'         =>  $prize,
+                    'answer_listen'         =>  $question->answer->listen,
+                    'answer_dislike'        =>  $question->answer->dislike,
+                    'answer_audio'          =>  $question->answer->audio,
+>>>>>>> Stashed changes
                 );
                 $datas[] = $data;
             }
@@ -139,7 +197,15 @@ class QuestionController extends Controller
             return $this->response(100);
         }
     }
+    //添加新问题api
+    public function add_Question(){
+        $id = Request::post('id');//提问问题id
+        $prize = Request::post('prize');//提问问题价格
+        $content = Request::post('content');//提问问题内容
+        $time = Request::post('time');//提问问题时间
+        $add_question = DB::insert('insert into question (id,prize,content,time) values ("$id","$prize","$content","time")');//提问sql语句
 
+<<<<<<< Updated upstream
     //我问的问题
     public function myQuestion()
     {
@@ -181,10 +247,23 @@ class QuestionController extends Controller
                 return $this->response(0);
             }
         } else {
+=======
+        if($add_question){
+            $data = array(
+                'question_id'           =>  $question->id,
+                'question_content'      =>  $question->content,
+                'question_prize'        =>  $question->prize,
+                'question_time'         =>  $question->time
+            )return $this->response(0, $data);
+        }else{
+            return $this->response(201);
+        }else{
+>>>>>>> Stashed changes
             return $this->response(100);
         }
     }
 
+<<<<<<< Updated upstream
     //听过的问提
     public function myListen()
     {
@@ -238,6 +317,9 @@ class QuestionController extends Controller
             return $this->response(100);
         }
     }
+=======
+
+>>>>>>> Stashed changes
 
 
 
