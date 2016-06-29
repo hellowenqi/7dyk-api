@@ -121,9 +121,9 @@ class QuestionController extends Controller
             return Code::response(100);
         }
     }
+    //添加问题
+    public function addQuestion(){
 
-    public function addQuestion()
-    {
         if (Request::has('prize') && Request::has('content') && Request::has('answer_user_id') && Request::has('question_user_id')) {
             $data['prize'] = Request::input('prize');//接值
             $data['content'] = Request::input('content');
@@ -186,13 +186,12 @@ class QuestionController extends Controller
         }
     }
 
-<<<<<<< Updated upstream
-    //听过的问提
-    public function myListen()
-=======
+
+
+
     //听过的问题
     public  function myListen()
->>>>>>> Stashed changes
+
     {
         if (Request::has('page') && Request::has('number')) {
             $page = Request::get('page');
@@ -213,7 +212,7 @@ class QuestionController extends Controller
         $where['answer_user_id'] = $user_id;
         $where['listen'] = 1;
         $listen_nums = DB::table('answer')->where($where)->sum('listen');
-<<<<<<< Updated upstream
+
         if (empty($listen)) {
             return $this->response(0);
         } else
@@ -253,24 +252,22 @@ class QuestionController extends Controller
         $question_id = Request::input('question_id');
         $res1 = DB::select("select * from question left join answer on question.id=answer.question_id where question.id=3");
 
-        $quanzhong = 0.6*$res1[0]->listen-0.4*$res1[0]->dislike;
+        $quanzhong = 0.6 * $res1[0]->listen - 0.4 * $res1[0]->dislike;
         $res = DB::update("update question set weight=weight+$quanzhong where id=3");
-        if (empty($res)) {
-=======
-        if(empty($listen_nums))
-        {
->>>>>>> Stashed changes
-            return $this->response(0);
-        } else{
-            return $this->response(100);
-        }
+
+            if (empty($res)) {
+
+                return $this->response(0);
+            } else {
+                return $this->response(100);
+            }
+
     }
 
 
     //查询当前问题的权重
     public function teacher_question()
     {
-
         $res = DB::table('question')->orderBy('weight','desc')->get();
         if (empty($res)) {
             return $this->response(0);
@@ -279,12 +276,12 @@ class QuestionController extends Controller
         }
     }
 
-
+   
 
 
 }
 
 
-
+ 
 
 
