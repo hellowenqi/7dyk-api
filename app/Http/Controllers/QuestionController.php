@@ -1,4 +1,5 @@
-<?php namespace App\Http\Controllers;
+<?php
+namespace App\Http\Controllers;
 
 use App\Models\Question;
 use App\Models\Answer;
@@ -185,8 +186,13 @@ class QuestionController extends Controller
         }
     }
 
+<<<<<<< Updated upstream
     //听过的问提
     public function myListen()
+=======
+    //听过的问题
+    public  function myListen()
+>>>>>>> Stashed changes
     {
         if (Request::has('page') && Request::has('number')) {
             $page = Request::get('page');
@@ -207,6 +213,7 @@ class QuestionController extends Controller
         $where['answer_user_id'] = $user_id;
         $where['listen'] = 1;
         $listen_nums = DB::table('answer')->where($where)->sum('listen');
+<<<<<<< Updated upstream
         if (empty($listen)) {
             return $this->response(0);
         } else
@@ -249,6 +256,10 @@ class QuestionController extends Controller
         $quanzhong = 0.6*$res1[0]->listen-0.4*$res1[0]->dislike;
         $res = DB::update("update question set weight=weight+$quanzhong where id=3");
         if (empty($res)) {
+=======
+        if(empty($listen_nums))
+        {
+>>>>>>> Stashed changes
             return $this->response(0);
         } else{
             return $this->response(100);

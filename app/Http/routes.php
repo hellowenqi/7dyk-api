@@ -16,6 +16,10 @@ Route::get('/', 'WelcomeController@index');
 Route::get('home', 'HomeController@index');
 Route::post('question', 'QuestionController@index');
 
+Route::controllers([
+    'auth' => 'Auth\AuthController',
+    'password' => 'Auth\PasswordController',
+]);
 
 Route::group(['prefix' => 'api'], function() {
     Route::group(['prefix' => 'v1'], function() {
@@ -35,7 +39,6 @@ Route::group(['prefix' => 'api'], function() {
 
 
 
-
             });
             Route::group(['prefix' => 'user'], function() {
                 Route::any('getteacher', 'UserController@getTeacher');
@@ -45,5 +48,28 @@ Route::group(['prefix' => 'api'], function() {
         //});
         Route::any('auth', 'UserController@auth');
         Route::any('code', 'UserController@code');
+
+
+        Route::group(['prefix' => 'question'], function() {
+            Route::any('test', 'QuestionController@test');
+            Route::any('gettopic', 'QuestionController@getTopic');
+            Route::any('getquestion', 'QuestionController@getQuestion');
+            Route::any('addquestion', 'QuestionController@addQuestion');
+            Route::any('myquestion', 'QuestionController@myQuestion');
+            Route::any('myanswer', 'QuestionController@myAnswer');
+            Route::any('mylisten', 'QuestionController@myListen');
+
+
+        });
+        Route::group(['prefix' => 'user'], function() {
+            Route::any('getteacher', 'UserController@getTeacher');
+            Route::any('getuserinfo', 'UserController@getUserinfo');
+        });
+        Route::group(['prefix' => 'answer'], function() {
+            Route::any('dislike','AnswerController@dislike');
+            Route::any('like','AnswerController@like');
+        });
+
+
     });
 });

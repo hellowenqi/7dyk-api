@@ -9,4 +9,11 @@ class Answer extends BaseModel {
     public function __construct() {
         parent::__construct();
     }
+    //听过的
+    public function answer() {
+        return $this->hasOne('App\Models\Answer', 'id', 'answer_id');
+    }
+
+
+
 }
