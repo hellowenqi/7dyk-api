@@ -20,7 +20,7 @@ class QuestionController extends Controller
     {
         return;
     }
-<<<<<<< Updated upstream
+
 
     public function response($errCode, $datas = array())
     {
@@ -47,7 +47,7 @@ class QuestionController extends Controller
             );
         }
         return json_encode($json, JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES);
-=======
+
     public function response($errCode, $datas = array()) {
         header("Access-Control-Allow-Origin:*");
         header("Access-Control-Allow-Methods:GET,POST");
@@ -89,7 +89,7 @@ class QuestionController extends Controller
         $teacher->answernum = 0; 
         $teacher->user_id = $user->id;
         $teacher->save();
->>>>>>> Stashed changes
+
     }
 
     public function test()
@@ -114,7 +114,7 @@ class QuestionController extends Controller
                     $prize = $teacher->prize;
                 }
                 $data = array(
-<<<<<<< Updated upstream
+
                     'question_id' => $question->id,
                     'question_content' => $question->content,
                     'question_prize' => $question->prize,
@@ -126,7 +126,7 @@ class QuestionController extends Controller
                     'answer_listen' => $question->answer->listen,
                     'answer_dislike' => $question->answer->dislike,
                     'answer_audio' => $question->answer->audio,
-=======
+
                     'question_id'           =>  $question->id,
                     'question_content'      =>  $question->content,
                     'question_prize'        =>  $question->prize,
@@ -138,7 +138,7 @@ class QuestionController extends Controller
                     'answer_listen'         =>  $question->answer->listen,
                     'answer_dislike'        =>  $question->answer->dislike,
                     'answer_audio'          =>  $question->answer->audio,
->>>>>>> Stashed changes
+
                 );
                 $datas[] = $data;
             }
@@ -205,7 +205,7 @@ class QuestionController extends Controller
         $time = Request::post('time');//提问问题时间
         $add_question = DB::insert('insert into question (id,prize,content,time) values ("$id","$prize","$content","time")');//提问sql语句
 
-<<<<<<< Updated upstream
+
     //我问的问题
     public function myQuestion()
     {
@@ -247,7 +247,7 @@ class QuestionController extends Controller
                 return $this->response(0);
             }
         } else {
-=======
+
         if($add_question){
             $data = array(
                 'question_id'           =>  $question->id,
@@ -258,12 +258,12 @@ class QuestionController extends Controller
         }else{
             return $this->response(201);
         }else{
->>>>>>> Stashed changes
+
             return $this->response(100);
         }
     }
 
-<<<<<<< Updated upstream
+
     //听过的问提
     public function myListen()
     {
@@ -317,9 +317,7 @@ class QuestionController extends Controller
             return $this->response(100);
         }
     }
-=======
 
->>>>>>> Stashed changes
 
 
 
