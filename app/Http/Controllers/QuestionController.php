@@ -273,7 +273,7 @@ class QuestionController extends Controller
     //不喜欢这个回答的人数
     public function dislike(){
         $answer_id = session("id");
-        $like_answer = DB::update("update answer set `dislike`=`dislike`+1 where id='answer_id'");
+        $like_answer = DB::update("update answer set `dislike`=`dislike`+1 where id=1");
         //echo $like_answer;die;
         if (empty($like_answer)) {
             return $this->response(0);
