@@ -21,6 +21,7 @@ Route::controllers([
     'password' => 'Auth\PasswordController',
 ]);
 
+
 Route::group(['prefix' => 'api'], function() {
     Route::group(['prefix' => 'v1'], function() {
         //Route::group(['middleware' => 'wechatauth'], function() {

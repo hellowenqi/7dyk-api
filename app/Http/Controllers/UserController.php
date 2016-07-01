@@ -144,4 +144,23 @@ class UserController extends Controller {
         return Redirect::to($redirect);
     }
 
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
