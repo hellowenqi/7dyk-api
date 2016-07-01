@@ -258,7 +258,7 @@ class QuestionController extends Controller
     return $this->response(100);
     }
 }
-
+    //喜欢回答的人数
     public function like(){
         $answer_id = session("id");
         $like_answer = DB::update("update answer set `like`=`like`+1 where id='answer_id'");
@@ -270,7 +270,7 @@ class QuestionController extends Controller
         }
 
     }
-
+    //不喜欢这个回答的人数
     public function dislike(){
         $answer_id = session("id");
         $like_answer = DB::update("update answer set `dislike`=`dislike`+1 where id='answer_id'");
@@ -283,7 +283,7 @@ class QuestionController extends Controller
     }
 
   
-    //计算权重
+    //计算问题的权重
     public function weight()
     {
         $question_id = Request::input('question_id');
@@ -300,9 +300,7 @@ class QuestionController extends Controller
             }
 
     }
-
-
-    //查询当前问题的权重排序
+    //把问题的权重排序
     public function teacher_question()
     {
         $res = DB::table('question')->orderBy('weight','desc')->get();
@@ -312,6 +310,9 @@ class QuestionController extends Controller
             return $this->response(100);
         }
     }
+
+
+
 
 }
 
