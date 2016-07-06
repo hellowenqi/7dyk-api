@@ -331,7 +331,7 @@ class QuestionController extends Controller
 
         //查询当前问题的权重排序
         public function teacher_question()
-    {
+        {
         $res = DB::table('question')->orderBy('weight','desc')->get();
         if (empty($res)) {
             return $this->response(0);
