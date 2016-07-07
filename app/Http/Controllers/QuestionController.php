@@ -289,7 +289,7 @@ class QuestionController extends Controller
         $answer_id = session("id");
         $like_answer = DB::update("update answer set `like`=`like`+1 where id='answer_id'");
         //echo $like_answer;die;
-        if (empty($like_answer)) {
+        if (!empty($like_answer)) {
             return Code::response(0);
         } else{
             return Code::response(100);
@@ -311,28 +311,27 @@ class QuestionController extends Controller
     //计算问题的权重
     public function weight(){
         $question_id = Request::input('question_id');
-        $res1 = DB::select("select * from question left join answer on question.id=answer.question_id where question.id=3");
-
+        $res1 = DB::select("select * from question left join answer on question.answer_id=answer.id where question.id=3");
         $quanzhong = 0.6 * $res1[0]->listen + 0.4 * $res1[0]->like;
         $res = DB::update("update question set weight=weight+$quanzhong where id=3");
-
-        if (empty($res)) {
+        if (!empty($res)) {
             return Code::response(0);
         } else {
             return Code::response(100);
         }
-
     }
 
     //查询当前问题的权重排序
     public function teacher_question()
     {
         $res = DB::table('question')->orderBy('weight','desc')->get();
-        if (empty($res)) {
+        if (!empty($res)) {
             return Code::response(0);
         } else {
             return Code::response(100);
         }
     }
+
+
 
 }
