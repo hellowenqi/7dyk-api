@@ -313,7 +313,7 @@ class QuestionController extends Controller
         $question_id = Request::input('question_id');
         $res1 = DB::select("select * from question left join answer on question.id=answer.question_id where question.id=3");
 
-        $quanzhong = 0.6 * $res1[0]->listen - 0.4 * $res1[0]->dislike;
+        $quanzhong = 0.6 * $res1[0]->listen - 0.4 * $res1[0]->like;
         $res = DB::update("update question set weight=weight+$quanzhong where id=3");
 
         if (empty($res)) {
@@ -323,4 +323,16 @@ class QuestionController extends Controller
         }
 
     }
+
+    //查询当前问题的权重排序
+    public function teacher_question()
+    {
+        $res = DB::table('question')->orderBy('weight','desc')->get();
+        if (empty($res)) {
+            return $this->response(0);
+        } else {
+            return $this->response(100);
+        }
+    }
+
 }

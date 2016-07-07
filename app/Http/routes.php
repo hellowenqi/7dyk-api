@@ -22,6 +22,10 @@ Route::get('/', 'WelcomeController@index');
 
 Route::get('home', 'HomeController@index');
 Route::post('question', 'QuestionController@index');
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 Route::group(['prefix' => 'api'], function() {
     Route::group(['prefix' => 'v1'], function() {
