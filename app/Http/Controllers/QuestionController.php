@@ -284,15 +284,15 @@ class QuestionController extends Controller
             return Code::response(100);
         }
     }
-    //喜欢回答的人数
+    //赞的人数
     public function like(){
         $answer_id = session("id");
         $like_answer = DB::update("update answer set `like`=`like`+1 where id='answer_id'");
         //echo $like_answer;die;
         if (empty($like_answer)) {
-            return $this->response(0);
+            return Code::response(0);
         } else{
-            return $this->response(100);
+            return Code::response(100);
         }
 
     }
@@ -302,24 +302,24 @@ class QuestionController extends Controller
         $like_answer = DB::update("update answer set `dislike`=`dislike`+1 where id=1");
         //echo $like_answer;die;
         if (empty($like_answer)) {
-            return $this->response(0);
+            return Code::response(0);
         } else{
-            return $this->response(100);
+            return Code::response(100);
         }
     }
-  
+
     //计算问题的权重
     public function weight(){
         $question_id = Request::input('question_id');
         $res1 = DB::select("select * from question left join answer on question.id=answer.question_id where question.id=3");
 
-        $quanzhong = 0.6 * $res1[0]->listen - 0.4 * $res1[0]->like;
+        $quanzhong = 0.6 * $res1[0]->listen + 0.4 * $res1[0]->like;
         $res = DB::update("update question set weight=weight+$quanzhong where id=3");
 
         if (empty($res)) {
-            return $this->response(0);
+            return Code::response(0);
         } else {
-            return $this->response(100);
+            return Code::response(100);
         }
 
     }
@@ -329,9 +329,9 @@ class QuestionController extends Controller
     {
         $res = DB::table('question')->orderBy('weight','desc')->get();
         if (empty($res)) {
-            return $this->response(0);
+            return Code::response(0);
         } else {
-            return $this->response(100);
+            return Code::response(100);
         }
     }
 
