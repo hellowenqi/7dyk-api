@@ -2,7 +2,7 @@
 
 use App\Models\BaseModel;
 
-class Question extends BaseModel {
+class Listen extends BaseModel {
 
     protected $table = 'listen';
 

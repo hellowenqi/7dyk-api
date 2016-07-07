@@ -8,8 +8,13 @@ use App\Models\User;
 use App\Models\Listen;
 use App\Code;
 use App\Wechat;
+use App\Wechat\WxPayConfig;
+use App\Wechat\WxPayApi;
+use App\Wechat\JsApiPay;
+use App\Wechat\WxPayUnifiedOrder;
 use Request;
 use Session;
+use Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
@@ -22,52 +27,11 @@ class QuestionController extends Controller
         return;
     }
 
-    public function response($errCode, $datas = array())
-    {
-        header("Access-Control-Allow-Origin:*");
-        header("Access-Control-Allow-Methods:GET,POST");
-        header("Access-Control-Allow-Headers: Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With");
-        if ($errCode == 100) {
-            $json = array(
-                'errCode' => 100,
-                'msg' => '参数错误',
-                'data' => $datas,
-            );
-        } else if ($errCode == 201) {
-            $json = array(
-                'errCode' => 201,
-                'msg' => '没有查询到问题',
-                'data' => $datas,
-            );
-        } else {
-            $json = array(
-                'errCode' => 0,
-                'msg' => 'ok',
-                'data' => $datas,
-            );
-        }
-        return json_encode($json, JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES);
-    }
-
     public function test() {
-        $user = new User();
-        $user->face = "http://imgsrc.baidu.com/forum/w%3D580/sign=df4215dfa4efce1bea2bc8c29f50f3e8/bcb5a212c8fcc3ce8c509f1a9145d688d53f20a8.jpg";
-        $user->wechat = "测试导师";
-        $user->title = "测试头衔";
-        $user->introduction = "这个程序员很懒，都用了同一条介绍";
-        $user->isteacher = 1;
-        $user->save();
-        $teacher = new Teacher;
-        $teacher->qrcode = "test";
-        $teacher->prize = 2.22;
-        $teacher->invite = "test";
-        $teacher->user_id = 2;
-        $teacher->answernum = 0; 
-        $teacher->user_id = $user->id;
-        $teacher->save();
-
+        $wechat = new Wechat();
+        $signPackage = $wechat->getSignPackage();
+        return Code::response(0, $signPackage);
     }
-
 
     public function getTopic()
     {
@@ -84,31 +48,19 @@ class QuestionController extends Controller
                     $prize = $teacher->prize;
                 }
                 $data = array(
-
-                    'question_id' => $question->id,
-                    'question_content' => $question->content,
-                    'question_prize' => $question->prize,
-                    'teacher_id' => $question->teacher->id,
-                    'teacher_name' => $question->teacher->wechat,
-                    'teacher_title' => $question->teacher->title,
-                    'teacher_face' => $question->teacher->face,
-                    'teacher_prize' => $prize,
-                    'answer_listen' => $question->answer->listen,
-                    'answer_dislike' => $question->answer->dislike,
-                    'answer_audio' => $question->answer->audio,
-
                     'question_id'           =>  $question->id,
                     'question_content'      =>  $question->content,
                     'question_prize'        =>  $question->prize,
-                    'teacher_id'             =>  $question->teacher->id,
+                    'teacher_id'            =>  $question->teacher->id,
                     'teacher_name'          =>  $question->teacher->wechat,
-                    'teacher_title'         =>  $question->teacher->title,
+                    'teacher_company'       =>  $question->teacher->company,
+                    'teacher_position'      =>  $question->teacher->position,
+                    'teacher_experience'    =>  $question->teacher->experience,
                     'teacher_face'          =>  $question->teacher->face,
                     'teacher_prize'         =>  $prize,
                     'answer_listen'         =>  $question->answer->listen,
                     'answer_dislike'        =>  $question->answer->dislike,
                     'answer_audio'          =>  $question->answer->audio,
-
                 );
                 $datas[] = $data;
             }
@@ -122,24 +74,49 @@ class QuestionController extends Controller
     {
         if (Request::has('id')) {
             $question_id = Request::get('id');
-            $question = Question::with('user')->with('teacher')->where('isanswered', 1)->where('id', $question_id)->first();
+            $question = Question::with('user')->with('teacher.teacher')->where('id', $question_id)->first();
             if (isset($question)) {
-                $teacher = Teacher::where('user_id', $question->teacher->id)->first();
-                $data = array(
-                    'question_id' => $question->id,
-                    'question_content' => $question->content,
-                    'question_prize' => $question->prize,
-                    'user_id' => $question->user->id,
-                    'user_face' => $question->user->face,
-                    'teacher_id' => $question->teacher->id,
-                    'teacher_name' => $question->teacher->wechat,
-                    'teacher_title' => $question->teacher->title,
-                    'teacher_face' => $question->teacher->face,
-                    'teacher_prize' => $teacher->prize,
-                    'answer_listen' => $question->answer->listen,
-                    'answer_dislike' => $question->answer->dislike,
-                    'answer_audio' => $question->answer->audio,
-                );
+                if($question->isanswered == 1) {
+                    $data = array(
+                        'question_id' => $question->id,
+                        'question_content' => $question->content,
+                        'question_prize' => $question->prize,
+                        'question_time' => $question->time,
+                        'user_id' => $question->user->id,
+                        'user_face' => $question->user->face,
+                        'user_name' => $question->user->wechat,
+                        'teacher_id' => $question->teacher->id,
+                        'teacher_name' => $question->teacher->wechat,
+                        'teacher_company' =>  $question->teacher->company,
+                        'teacher_position' =>  $question->teacher->position,
+                        'teacher_experience' =>  $question->teacher->experience,
+                        'teacher_face' => $question->teacher->face,
+                        'teacher_prize' => $question->teacher->teacher->prize,
+                        'answer_listen' => $question->answer->listen,
+                        'answer_dislike' => $question->answer->dislike,
+                        'answer_audio' => $question->answer->audio,
+                        'answer_time' => $question->answer->time,
+                        'isanswered' => $question->isanswered,
+                    );
+                } else {
+                    $data = array(
+                        'question_id' => $question->id,
+                        'question_content' => $question->content,
+                        'question_prize' => $question->prize,
+                        'question_time' => $question->time,
+                        'user_id' => $question->user->id,
+                        'user_face' => $question->user->face,
+                        'user_name' => $question->user->wechat,
+                        'teacher_id' => $question->teacher->id,
+                        'teacher_name' => $question->teacher->wechat,
+                        'teacher_company' =>  $question->teacher->company,
+                        'teacher_position' =>  $question->teacher->position,
+                        'teacher_experience' =>  $question->teacher->experience,
+                        'teacher_face' => $question->teacher->face,
+                        'teacher_prize' => $question->teacher->teacher->prize,
+                        'isanswered' => $question->isanswered,
+                    );
+                }
                 return Code::response(0, $data);
             } else {
                 return Code::response(201);
@@ -150,7 +127,6 @@ class QuestionController extends Controller
     }
     //添加问题
     public function addQuestion(){
-
         if (Request::has('prize') && Request::has('content') && Request::has('answer_user_id') && Request::has('question_user_id')) {
             $data['prize'] = Request::input('prize');//接值
             $data['content'] = Request::input('content');
@@ -160,16 +136,64 @@ class QuestionController extends Controller
             $data['weight'] = 0;
             $data['answer_id'] = 0;
             $data['time'] = date("Y-m-d H:i:s", time());
+
             $re = DB::table('question')->insert($data);
             //返回结果
-            return $this->response(0, $data);
+            return Code::response(0, $data);
         } else {
-            return $this->response(100);
+            return Code::response(100);
         }
     }
 
+    public function testQuestion() {
+        if (Request::has('content') && Request::has('answer_user_id')) {
+            //$user_id = Session::get('user_id');
+            $user_id = 1;
+            $time = time();
+            $name = md5("$user_id$time");
+            $teacher = Teacher::where('user_id', Request::get('answer_user_id'))->first();
+            if(!isset($teacher)) {
+                return Code::response(103);
+            }
 
+            //$prize = (int)$teacher->prize;
+            $prize = 1;
+            $content = Request::input('content');
+            $answer_user_id = Request::input('answer_user_id');
 
+            $tools = new JsApiPay();
+
+            $input = new WxPayUnifiedOrder();
+            $input->SetBody("body");
+            $input->SetAttach($name);
+            $input->SetOut_trade_no(WxPayConfig::MCHID.date("YmdHis"));
+            $input->SetTotal_fee($prize);
+            date_default_timezone_set('PRC');
+            $input->SetTime_start(date("YmdHis", time()));
+            $input->SetTime_expire(date("YmdHis", time() + 600));
+            $input->SetGoods_tag("tag");
+            $input->SetNotify_url("http://api.7dyk.com/api/v1/answer/notify");
+            $input->SetTrade_type("JSAPI");
+            $input->SetOpenid("on7Ogwj04PIfSCxa2ypeMrGuvAGU");
+            $order = WxPayApi::unifiedOrder($input);
+            $jsApiParameters = json_decode($tools->GetJsApiParameters($order));
+
+            $question = new Question();
+            $question->prize = $prize;
+            $question->content = $content;
+            $question->answer_user_id = $answer_user_id;
+            $question->question_user_id = $user_id;
+            $question->isanswered = 0;
+            $question->weight = 0;
+            $question->answer_id = 0;
+            $question->time = date("Y-m-d H:i:s", time());
+            Cache::put($name, $question, 10);
+            return Code::response(0, $jsApiParameters);
+            //$re = DB::table('question')->insert($data);
+        } else {
+            return Code::response(100);
+        }
+    }
     //我问的问题
     public function myQuestion()
     {
@@ -181,6 +205,13 @@ class QuestionController extends Controller
             $user_id = 1;
 
             $arr = DB::table('question')->where('question_user_id', $user_id)->orderBy('time', 'desc')->skip($index)->take($number)->get();
+            foreach($arr as $key => $data) {
+                if($data->isanswered == 1) {
+                    $answer = Answer::where('id', $data->answer_id)->first();
+                    $arr[$key]->listen = $answer->listen;
+                    $arr[$key]->like = $answer->like;
+                }
+            }
             //返回结果
             if ($arr) {
                 return Code::response(0, $arr);
@@ -203,61 +234,56 @@ class QuestionController extends Controller
             $user_id = 1;
 
             $arr = DB::table('question')->where('answer_user_id', $user_id)->skip($index)->take($number)->get();//打印数组
+            foreach($arr as $key => $data) {
+                if($data->isanswered == 1) {
+                    $answer = Answer::where('id', $data->answer_id)->first();
+                    $arr[$key]->listen = $answer->listen;
+                    $arr[$key]->like = $answer->like;
+                }
+            }
 
             //返回结果
             if ($arr) {
-                return $this->response(0, $arr);
+                return Code::response(0, $arr);
             } else {
-                return $this->response(0);
+                return Code::response(0);
             }
         } else {
-
-            if ($add_question) {
-                $data = array(
-                    'question_id' => $question->id,
-                    'question_content' => $question->content,
-                    'question_prize' => $question->prize,
-                    'question_time' => $question->time
-                );
-                return $this->response(0, $data);
-            } else {
-                return $this->response(201);
-            }
+            return Code::response(100);
         }
     }
-
 
     //听过的问提
     public function myListen()
     {
         if (Request::has('page') && Request::has('number')) {
+            //$user_id = Session::get('user_id');
+            $user_id = 1;
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
-            $user_id = Session::get('user_id');
 
-            $arr = DB::table('question')->where('answer_user_id', $user_id)->skip($index)->take($number)->get();//打印数组
-            //print_r($arr);
-            //返回结果
-            if ($arr) {
-                return $this->response(0, $arr);
+            $listens = Listen::with("answer.question")->with("user")->where("user_id", $user_id)->skip($index)->take($number)->get();
+            $datas = array();
+            foreach($listens as $key => $listen) {
+                $data['id'] = $listen->answer->question->id;
+                $data['prize'] = $listen->answer->question->prize;
+                $data['content'] = $listen->answer->question->content;
+                $data['time'] = $listen->answer->question->time;
+                $data['isanswered'] = $listen->answer->question->isanswered;
+                $data['answer_id'] = $listen->answer->question->answer_id;
+                $data['user_face'] = $listen->user->face;
+                $data['listen'] = $listen->answer->listen;
+                $data['dislike'] = $listen->answer->dislike;
+                $datas[] = $data;
             }
+
+            //返回结果
+            return Code::response(0, $datas);
         } else {
-            return $this->response(100);
+            return Code::response(100);
         }
-        $user_id = session("user_id");
-        $where['answer_user_id'] = $user_id;
-        $where['listen'] = 1;
-        $listen_nums = DB::table('answer')->where($where)->sum('listen');
-
-        if (empty($listen)) {
-            return $this->response(0);
-        } else
-
-    {
-    return $this->response(100);
     }
-}
     //喜欢回答的人数
     public function like(){
         $answer_id = session("id");
@@ -281,37 +307,8 @@ class QuestionController extends Controller
             return $this->response(100);
         }
     }
-
   
     //计算问题的权重
-    public function weight()
-    {
-        $question_id = Request::input('question_id');
-        $res1 = DB::select("select * from question left join answer on question.id=answer.question_id where question.id=3");
-
-        $quanzhong = 0.6 * $res1[0]->listen - 0.4 * $res1[0]->dislike;
-        $res = DB::update("update question set weight=weight+$quanzhong where id=3");
-
-            if (empty($res)) {
-
-                return $this->response(0);
-            } else {
-                return $this->response(100);
-            }
-
-    }
-    //把问题的权重排序
-    public function teacher_question()
-    {
-        $res = DB::table('question')->orderBy('weight','desc')->get();
-        if (empty($res)) {
-            return $this->response(0);
-        } else{
-            return $this->response(100);
-        }
-    }
-        //计算权重
-
     public function weight(){
         $question_id = Request::input('question_id');
         $res1 = DB::select("select * from question left join answer on question.id=answer.question_id where question.id=3");
@@ -320,32 +317,10 @@ class QuestionController extends Controller
         $res = DB::update("update question set weight=weight+$quanzhong where id=3");
 
         if (empty($res)) {
-
             return $this->response(0);
         } else {
             return $this->response(100);
         }
 
     }
-
-
-        //查询当前问题的权重排序
-        public function teacher_question()
-    {
-        $res = DB::table('question')->orderBy('weight','desc')->get();
-        if (empty($res)) {
-            return $this->response(0);
-        } else{
-            return $this->response(100);
-        }
-    }
-
-
-
-
 }
-
-
- 
-
-

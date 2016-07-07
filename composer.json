@@ -6,7 +6,9 @@
 	"type": "project",
 	"require": {
 		"laravel/framework": "5.0.*",
-		"php-curl-class/php-curl-class": "^4.11"
+		"php-curl-class/php-curl-class": "^4.11",
+		"qiniu/php-sdk": "^7.0",
+		"php-ffmpeg/php-ffmpeg": "~0.5"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.0",

@@ -70,13 +70,24 @@ class Wechat extends BaseModel {
         return Session::has('openid');
     }
 
-    public function loginWechat() {
-        $url = urlencode("http://h5app.7dyk.com/dev/wq/public/api/v1/code");
-
+    public function loginWechat($url) {
         $appid = $this->appId;
         $login_url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=$appid&redirect_uri=$url&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
 
         return Redirect::to($login_url);
+    }
+
+    public function getFile($media_id) {
+        $curl = new Curl();
+        $token = $this->getToken();
+
+        $curl->get('http://file.api.weixin.qq.com/cgi-bin/media/get', array(
+            'access_token'  =>  $token,
+            'media_id'      =>  $media_id,
+        ));
+        $response = $curl->response;
+
+        return $response;
     }
 
     public function getOpenid($code) {
