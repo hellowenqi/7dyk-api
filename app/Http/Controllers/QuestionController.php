@@ -21,6 +21,7 @@ class QuestionController extends Controller
     {
         return;
     }
+<<<<<<< Updated upstream
 
     public function response($errCode, $datas = array())
     {
@@ -49,6 +50,33 @@ class QuestionController extends Controller
         return json_encode($json, JSON_UNESCAPED_UNICODE + JSON_UNESCAPED_SLASHES);
     }
 
+=======
+    public function response($errCode, $datas = array()) {
+        header("Access-Control-Allow-Origin:*");
+        header("Access-Control-Allow-Methods:GET,POST");
+        header("Access-Control-Allow-Headers: Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With");
+        if($errCode == 100) {
+            $json = array(
+                'errCode'   =>  100,
+                'msg'       =>  '参数错误',
+                'data'      =>  $datas,
+            );
+        } else if($errCode == 201) {
+            $json = array(
+                'errCode'   =>  201,
+                'msg'       =>  '没有查询到问题',
+                'data'      =>  $datas,
+            );
+        } else {
+            $json = array(
+                'errCode'   =>  0,
+                'msg'       =>  'ok',
+                'data'      =>  $datas,
+            );
+        }
+        return json_encode($json, JSON_UNESCAPED_UNICODE+JSON_UNESCAPED_SLASHES);
+    }
+>>>>>>> Stashed changes
     public function test() {
         $user = new User();
         $user->face = "http://imgsrc.baidu.com/forum/w%3D580/sign=df4215dfa4efce1bea2bc8c29f50f3e8/bcb5a212c8fcc3ce8c509f1a9145d688d53f20a8.jpg";
@@ -257,6 +285,7 @@ class QuestionController extends Controller
     {
     return $this->response(100);
     }
+<<<<<<< Updated upstream
 }
     //喜欢回答的人数
     public function like(){
@@ -339,6 +368,34 @@ class QuestionController extends Controller
             return $this->response(100);
         }
     }
+=======
+    //添加新问题api
+    public function add_Question(){
+        $id = Request::post('id');//提问问题id
+        $prize = Request::post('prize');//提问问题价格
+        $content = Request::post('content');//提问问题内容
+        $time = Request::post('time');//提问问题时间
+        $add_question = DB::insert('insert into question (id,prize,content,time) values ("$id","$prize","$content","time")');//提问sql语句
+
+        if($add_question){
+            $data = array(
+                'question_id'           =>  $question->id,
+                'question_content'      =>  $question->content,
+                'question_prize'        =>  $question->prize,
+                'question_time'         =>  $question->time
+            )return $this->response(0, $data);
+        }else{
+            return $this->response(201);
+        }else{
+            return $this->response(100);
+        }
+    }
+
+
+
+
+
+>>>>>>> Stashed changes
 
 
 
