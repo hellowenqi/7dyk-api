@@ -62,3 +62,11 @@ Route::group(['prefix' => 'api'], function() {
         Route::any('notify', 'AnswerController@notify');
     });
 });
+//后台管理员
+Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
+    Route::group(['prefix' => 'v1'], function() {
+        Route::group(['prefix' => 'question'], function() {
+            Route::get('/', 'QuestionController@getList');
+        });
+    });
+});
