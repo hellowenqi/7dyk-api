@@ -46,8 +46,14 @@ class UserController extends Controller {
     public function getUserinfo() {
         if(Request::has('id')) {
             $id = Request::get('id');
+            $user_id = Session::get('user_id');
             $user = User::with('teacher')->where('id', $id)->first();
             if(isset($user)) {
+                if($id == $user_id) {
+                    $same = 1;
+                } else {
+                    $same = 0;
+                }
                 if($user->isteacher) {
                     $data = array(
                         'is_teacher'        =>  $user->isteacher,
@@ -58,6 +64,7 @@ class UserController extends Controller {
                         'user_experience'   =>  $user->experience,
                         'user_face'         =>  $user->face,
                         'user_introduction' =>  $user->introduction,
+                        'user_same'         =>  $same,
                         'teacher_income'    =>  $user->teacher->income,
                         'teacher_prize'     =>  $user->teacher->prize,
                         'listen_num'        =>  $user->teacher->listennum,
@@ -73,6 +80,7 @@ class UserController extends Controller {
                         'user_experience'   =>  $user->experience,
                         'user_face'         =>  $user->face,
                         'user_introduction' =>  $user->introduction,
+                        'user_same'         =>  $same,
                     );
                 }
                 return Code::response(0, $data);
@@ -83,7 +91,7 @@ class UserController extends Controller {
     }
 
     public function editUsernow() {
-        $id = 1;
+        $id = Session::get('user_id');
         $user = User::where('id', $id)->first();
         if(Request::has("company")) {
             $company = Request::get('company');
@@ -107,7 +115,7 @@ class UserController extends Controller {
     }
 
     public function getUsernow() {
-        $id = 1;
+        $id = Session::get('user_id');
         $user = User::with('teacher')->where('id', $id)->first();
         if(isset($user)) {
             if($user->isteacher) {
@@ -204,7 +212,7 @@ class UserController extends Controller {
             $redirect = "http://www.baidu.com";
         }
         Session::put('redirect', $redirect);
-        return $wechat->loginWechat("http://h5app.7dyk.com/api/public/api/v1/code");
+        return $wechat->loginWechat("http://h5app.7dyk.com/ama/api/public/api/v1/code");
     }
 
     public function code() {

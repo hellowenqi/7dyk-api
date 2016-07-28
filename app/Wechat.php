@@ -38,14 +38,13 @@ class Wechat extends BaseModel {
         return $response;
     }
 
-    public function getSignPackage() {
+    public function getSignPackage($url) {
         $ticket = $this->getTicket();
         $appid = $this->appId;
 
         // 注意 URL 一定要动态获取，不能 hardcode.
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-        $url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-        $url = "http://h5app.7dyk.com/ama/7dyk/";
+        //$url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 
         $timestamp = time();
         $nonceStr = $this->createNonceStr();
@@ -72,6 +71,7 @@ class Wechat extends BaseModel {
 
     public function loginWechat($url) {
         $appid = $this->appId;
+        $url = urlencode($url);
         $login_url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=$appid&redirect_uri=$url&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
 
         return Redirect::to($login_url);

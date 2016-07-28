@@ -2,6 +2,7 @@
 
 use Request;
 use Cache;
+use Session;
 use App\Code;
 use App\Wechat;
 use App\Models\Answer;
@@ -26,21 +27,28 @@ class AnswerController extends Controller {
 
     public function listen() {
         if(Request::has('answer_id')) {
-            //$user_id = Session::get('user_id');
-            $user_id = 1;
+            $user_id = Session::get('user_id');
             $answer_id = Request::get('answer_id');
-            $listen = Listen::with('answer')->where('user_id', $user_id)->where('answer_id', $answer_id)->first();
+            $answer = Answer::with('question')->find($answer_id);
+            if(isset($answer) && ($answer->answer_user_id == $user_id || $answer->question_user_id == $user_id)) {
+                $name = $answer->audio;
+                return Code::response(0, array(
+                    'url' => "http://h5app.7dyk.com/ama/api/public/api/v1/answer/audio?name=$name&answer_id=$answer_id",
+                    'question_id' => $answer->question->id,
+                ));
+            }
+            $listen = Listen::where('user_id', $user_id)->where('answer_id', $answer_id)->first();
             if(isset($listen)) {
-                return Code::response(0);
-                $name = $listen->answer->audio;
-                $mp3 = file_get_contents("audio/$name.mp3");
-                header("Content-type:audio/mp3");
-                echo $mp3;
-                return;
+                $name = $answer->audio;
+                return Code::response(0, array(
+                    'url' => "http://h5app.7dyk.com/ama/api/public/api/v1/answer/audio?name=$name&answer_id=$answer_id",
+                    'question_id' => $listen->answer->question->id,
+                ));
             } else {
                 $time = time();
                 $name = md5("$user_id$time");
                 $tools = new JsApiPay();
+                $openid = Session::get('openid');
                 date_default_timezone_set('PRC');
                 $input = new WxPayUnifiedOrder();
                 $input->SetBody("body");
@@ -50,13 +58,13 @@ class AnswerController extends Controller {
                 $input->SetTime_start(date("YmdHis", time()));
                 $input->SetTime_expire(date("YmdHis", time() + 600));
                 $input->SetGoods_tag("tag");
-                $input->SetNotify_url("http://api.7dyk.com/api/v1/answer/notify");
+                $input->SetNotify_url("http://h5app.7dyk.com/ama/api/public/api/v1/notify");
                 $input->SetTrade_type("JSAPI");
-                $input->SetOpenid("on7Ogwj04PIfSCxa2ypeMrGuvAGU");
+                $input->SetOpenid($openid);
                 $order = WxPayApi::unifiedOrder($input);
                 $jsApiParameters = json_decode($tools->GetJsApiParameters($order));
 
-                $listen = new Question();
+                $listen = new Listen();
                 $listen->answer_id = $answer_id;
                 $listen->user_id = $user_id;
                 $listen->time = date("Y-m-d H:i:s", time());
@@ -70,7 +78,7 @@ class AnswerController extends Controller {
 
     public function answer() {
         if(Request::has('server_id') && Request::has('question_id')) {
-            $user_id = 1;
+            $user_id = Session::get('user_id');
             $teacher = Teacher::where('user_id', $user_id)->first();
             if(!isset($teacher)) {
                 return Code::response(303);
@@ -138,23 +146,23 @@ class AnswerController extends Controller {
         }
     }
 
-    public function prepay() {
-        $question = new Question();
-        $question->prize = 1;
-        $question->content = "123";
-        $question->answer_user_id = 1;
-        $question->question_user_id = 1;
-        $question->isanswered = 0;
-        $question->weight = 0;
-        $question->answer_id = 0;
-        $question->time = date("Y-m-d H:i:s", time());
-        Cache::put("test", $question, 10);
-        $a = Cache::get("test");
-        $class = get_class($a);
-        dd($class);
-        /*$mp3 = file_get_contents("audio/ddd7c2f15f2ee07d47df212091903c7f.mp3");
-        header("Content-type:audio/mp3");
-        echo $mp3;*/
+    public function audio() {
+        if(Request::has('name') && Request::has('answer_id')) {
+            //$user_id = Session::get('user_id');
+            $name = Request::get('name');
+            $answer_id = Request::get('answer_id');
+            $listen = Listen::with('answer')/**->where('user_id', $user_id)**/->where('answer_id', $answer_id)->first();
+            if(/**isset($listen) &&**/ $name == $listen->answer->audio) {
+                $mp3 = file_get_contents("audio/$name.mp3");
+                header("Content-type:audio/mp3");
+                echo $mp3;
+                return;
+            } else {
+                return Code::response(100);
+            }
+        } else {
+            return Code::response(100);
+        }
     }
 
     public function notify() {

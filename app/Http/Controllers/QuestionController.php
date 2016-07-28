@@ -6,6 +6,7 @@ use App\Models\Answer;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Models\Listen;
+use App\Models\Like;
 use App\Code;
 use App\Wechat;
 use App\Wechat\WxPayConfig;
@@ -28,24 +29,35 @@ class QuestionController extends Controller
     }
 
     public function test() {
+        if(Request::has('url')) {
+            $url = Request::get('url');
+        } else {
+            $url = "http://h5app.7dyk.com/ama/7dyk/";
+        }
         $wechat = new Wechat();
-        $signPackage = $wechat->getSignPackage();
+        $signPackage = $wechat->getSignPackage($url);
         return Code::response(0, $signPackage);
     }
 
     public function getTopic()
     {
         if (Request::has('page') && Request::has('number')) {
+            $user_id = Session::get('user_id');
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
             $questions = Question::where('isanswered', 1)->
-            with('answer')->with('teacher')->orderBy('weight', 'desc')->skip($index)->take($number)->get();
+            with('answer')->with('teacher.teacher')->orderBy('weight', 'desc')->skip($index)->take($number)->get();
             $datas = array();
             foreach ($questions as $key => $question) {
-                $teacher = Teacher::where('user_id', $question->teacher->id)->first();
-                if (isset($teacher)) {
-                    $prize = $teacher->prize;
+                $listen = Listen::where('user_id', $user_id)->where('answer_id', $question->answer->id)->first();
+                if(isset($listen)) {
+                    $isPayed = 1;
+                } else {
+                    $isPayed = 0;
+                }
+                if($question->answer_user_id == $user_id || $question->question_user_id == $user_id) {
+                    $isPayed = 1;
                 }
                 $data = array(
                     'question_id'           =>  $question->id,
@@ -57,10 +69,12 @@ class QuestionController extends Controller
                     'teacher_position'      =>  $question->teacher->position,
                     'teacher_experience'    =>  $question->teacher->experience,
                     'teacher_face'          =>  $question->teacher->face,
-                    'teacher_prize'         =>  $prize,
+                    'teacher_prize'         =>  $question->teacher->teacher->prize,
+                    'answer_id'             =>  $question->answer->id,
                     'answer_listen'         =>  $question->answer->listen,
-                    'answer_dislike'        =>  $question->answer->dislike,
+                    'answer_like'           =>  $question->answer->like,
                     'answer_audio'          =>  $question->answer->audio,
+                    'answer_ispayed'        =>  $isPayed,
                 );
                 $datas[] = $data;
             }
@@ -73,10 +87,26 @@ class QuestionController extends Controller
     public function getQuestion()
     {
         if (Request::has('id')) {
+            $user_id = Session::get('user_id');
             $question_id = Request::get('id');
-            $question = Question::with('user')->with('teacher.teacher')->where('id', $question_id)->first();
+            $question = Question::with('answer')->with('user')->with('teacher.teacher')->where('id', $question_id)->first();
             if (isset($question)) {
                 if($question->isanswered == 1) {
+                    $like = Like::where('user_id', $user_id)->where('answer_id', $question->answer->id)->first();
+                    if(isset($like)) {
+                        $isliked = 1;
+                    } else {
+                        $isliked = 0;
+                    }
+                    $listen = Listen::where('user_id', $user_id)->where('answer_id', $question->answer->id)->first();
+                    if(isset($listen)) {
+                        $isPayed = 1;
+                    } else {
+                        $isPayed = 0;
+                    }
+                    if($question->answer_user_id == $user_id || $question->question_user_id == $user_id) {
+                        $isPayed = 1;
+                    }
                     $data = array(
                         'question_id' => $question->id,
                         'question_content' => $question->content,
@@ -92,10 +122,13 @@ class QuestionController extends Controller
                         'teacher_experience' =>  $question->teacher->experience,
                         'teacher_face' => $question->teacher->face,
                         'teacher_prize' => $question->teacher->teacher->prize,
+                        'answer_id' => $question->answer->id,
                         'answer_listen' => $question->answer->listen,
-                        'answer_dislike' => $question->answer->dislike,
+                        'answer_like' => $question->answer->like,
                         'answer_audio' => $question->answer->audio,
                         'answer_time' => $question->answer->time,
+                        'answer_ispayed' => $isPayed,
+                        'answer_isliked' => $isliked,
                         'isanswered' => $question->isanswered,
                     );
                 } else {
@@ -147,8 +180,7 @@ class QuestionController extends Controller
 
     public function testQuestion() {
         if (Request::has('content') && Request::has('answer_user_id')) {
-            //$user_id = Session::get('user_id');
-            $user_id = 1;
+            $user_id = Session::get('user_id');
             $time = time();
             $name = md5("$user_id$time");
             $teacher = Teacher::where('user_id', Request::get('answer_user_id'))->first();
@@ -162,6 +194,7 @@ class QuestionController extends Controller
             $answer_user_id = Request::input('answer_user_id');
 
             $tools = new JsApiPay();
+            $openid = Session::get('openid');
 
             $input = new WxPayUnifiedOrder();
             $input->SetBody("body");
@@ -172,9 +205,9 @@ class QuestionController extends Controller
             $input->SetTime_start(date("YmdHis", time()));
             $input->SetTime_expire(date("YmdHis", time() + 600));
             $input->SetGoods_tag("tag");
-            $input->SetNotify_url("http://api.7dyk.com/api/v1/answer/notify");
+            $input->SetNotify_url("http://h5app.7dyk.com/ama/api/public/api/v1/notify");
             $input->SetTrade_type("JSAPI");
-            $input->SetOpenid("on7Ogwj04PIfSCxa2ypeMrGuvAGU");
+            $input->SetOpenid($openid);
             $order = WxPayApi::unifiedOrder($input);
             $jsApiParameters = json_decode($tools->GetJsApiParameters($order));
 
@@ -201,10 +234,9 @@ class QuestionController extends Controller
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
-            //$user_id = Session::get('user_id');
-            $user_id = 1;
+            $user_id = Session::get('user_id');
 
-            $arr = DB::table('question')->where('question_user_id', $user_id)->orderBy('time', 'desc')->skip($index)->take($number)->get();
+            $arr = DB::table('question')->where('question_user_id', $user_id)->orderBy('isanswered', 'desc')->orderBy('time', 'desc')->skip($index)->take($number)->get();
             foreach($arr as $key => $data) {
                 if($data->isanswered == 1) {
                     $answer = Answer::where('id', $data->answer_id)->first();
@@ -230,16 +262,18 @@ class QuestionController extends Controller
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
-            //$user_id = Session::get('user_id');
-            $user_id = 1;
+            $user_id = Session::get('user_id');
 
-            $arr = DB::table('question')->where('answer_user_id', $user_id)->skip($index)->take($number)->get();//打印数组
+            $arr = DB::table('question')->where('answer_user_id', $user_id)->orderBy('isanswered', 'asc')->skip($index)->take($number)->get();//打印数组
             foreach($arr as $key => $data) {
                 if($data->isanswered == 1) {
-                    $answer = Answer::where('id', $data->answer_id)->first();
+                    $answer = Answer::with('user')->where('id', $data->answer_id)->first();
                     $arr[$key]->listen = $answer->listen;
                     $arr[$key]->like = $answer->like;
                 }
+                $user = User::where('id' , $data->question_user_id)->first();
+                $arr[$key]->user_name = $user->wechat;
+                $arr[$key]->user_face = $user->face;
             }
 
             //返回结果
@@ -257,13 +291,12 @@ class QuestionController extends Controller
     public function myListen()
     {
         if (Request::has('page') && Request::has('number')) {
-            //$user_id = Session::get('user_id');
-            $user_id = 1;
+            $user_id = Session::get('user_id');
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
 
-            $listens = Listen::with("answer.question")->with("user")->where("user_id", $user_id)->skip($index)->take($number)->get();
+            $listens = Listen::with("answer.question.teacher")->where("user_id", $user_id)->skip($index)->take($number)->get();
             $datas = array();
             foreach($listens as $key => $listen) {
                 $data['id'] = $listen->answer->question->id;
@@ -272,9 +305,12 @@ class QuestionController extends Controller
                 $data['time'] = $listen->answer->question->time;
                 $data['isanswered'] = $listen->answer->question->isanswered;
                 $data['answer_id'] = $listen->answer->question->answer_id;
-                $data['user_face'] = $listen->user->face;
+                $data['teacher_id'] = $listen->answer->question->teacher->id;
+                $data['teacher_name'] = $listen->answer->question->teacher->wechat;
+                $data['teacher_face'] = $listen->answer->question->teacher->face;
+                $data['teacher_position'] = $listen->answer->question->teacher->position;
                 $data['listen'] = $listen->answer->listen;
-                $data['dislike'] = $listen->answer->dislike;
+                $data['like'] = $listen->answer->like;
                 $datas[] = $data;
             }
 
@@ -284,17 +320,30 @@ class QuestionController extends Controller
             return Code::response(100);
         }
     }
-    //赞的人数
+    //点赞
     public function like(){
-        $answer_id = session("id");
-        $like_answer = DB::update("update answer set `like`=`like`+1 where id='answer_id'");
-        //echo $like_answer;die;
-        if (!empty($like_answer)) {
-            return Code::response(0);
-        } else{
+        if(Request::has('answer_id')) {
+            $id = Request::get('answer_id');
+            $user_id = Session::get('user_id');
+            $answer = Answer::with('question')->find($id);
+            $like = Like::where('answer_id', $id)->where('user_id', $user_id)->first();
+            if(isset($answer) && !isset($like)){
+                $answer->like += 1;
+                $answer->save();
+                $answer->question->weight += 0.4;
+                $answer->question->save();
+                $like = new Like();
+                $like->answer_id = $id;
+                $like->user_id = $user_id;
+                $like->time = date("Y-m-d H:i:s", time());
+                $like->save();
+                return Code::response(0, $answer);
+            } else {
+                return Code::response(100, $like);
+            }
+        } else {
             return Code::response(100);
         }
-
     }
     //不喜欢这个回答的人数
     public function dislike(){

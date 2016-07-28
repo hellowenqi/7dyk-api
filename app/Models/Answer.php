@@ -14,6 +14,10 @@ class Answer extends BaseModel {
         return $this->hasOne('App\Models\Question', 'id', 'question_id');
     }
 
+    public function user() {
+        return $this->hasOne('App\Models\User', 'id', 'question_user_id');
+    }
+
     public function teacher() {
         return $this->hasOne('App\Models\User', 'id', 'answer_user_id');
     }
