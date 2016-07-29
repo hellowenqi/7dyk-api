@@ -22,21 +22,37 @@ class QuestionController extends Controller {
 		if (Request::has('page') && Request::has('number')) {
 			$page = intval(Request::get('page'));
 			$number = intval(Request::get('number'));
+            $search = Request::get('search');
 			$index = ($page - 1) * $number;
-            $gets = Request::all();
-            $orderableKeys = ['id', 'prize', 'isanswered', 'time', 'question_user_id', 'question_user_id', 'like', 'like_virtual', 'listen', 'listen_virtual'];
+            $orderableKeys = array(
+				'question_id'				=> 'id',
+				'question_prize'			=> 'prize',
+				'question_time'				=> 'time',
+				'is_answered'				=> 'isanswered',
+				'user_id'					=> 'question_user_id',
+                'teacher_id'                => 'question_teacher_id',
+                'answer_like'               => 'like',
+                'answer_like_virtual'       => 'like_virtual',
+                'answer_listen'             => 'listen',
+                'answer_listen_virtual'     =>'listen_virtual'
+            );
             $orderableValues = ['asc', 'desc'];
             $orderKey = Request::get('field');
             $orderValue = Request::get('order');
 
-            //搜索功能 排序功能之后加
+            //搜索功能
 			$query = Question::with('answer')
                 ->with('teacher')
                 ->with('user')
                 ->skip($index)
                 ->take($number);
-            if($orderKey && $orderValue && in_array($orderKey, $orderableKeys) && in_array($orderValue, $orderableValues)){
-                $query -> orderBy($orderKey, $orderValue);
+            //筛选
+            if($orderKey && $orderValue && isset($orderableKeys[$orderKey]) && in_array($orderValue, $orderableValues)){
+                $query -> orderBy($orderableKeys[$orderKey], $orderValue);
+            }
+            //搜索
+            if($search){
+                $query->where('content' , 'like', '%' . $search . '%');
             }
 //            DB::enableQueryLog();
             $questions = $query->get();
