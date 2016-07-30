@@ -2,6 +2,7 @@
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Models\Answer;
 use App\Models\Question;
 use App\Code;
 use Request;
@@ -19,58 +20,113 @@ class QuestionController extends Controller {
 
 	public function getList()
 	{
-		if (Request::has('page') && Request::has('number')) {
-			$page = intval(Request::get('page'));
-			$number = intval(Request::get('number'));
-			$index = ($page - 1) * $number;
-            $gets = Request::all();
-            $orderableKeys = ['id', 'prize', 'isanswered', 'time', 'question_user_id', 'question_user_id', 'like', 'like_virtual', 'listen', 'listen_virtual'];
+        DB::enableQueryLog();
+		if (Request::has('page') && Request::has('number') && Request::has('is_answered')) {
+            $orderableQuestionKeys = array(
+                'question_id'           => 'id',
+                'question_prize'        => 'prize',
+                'question_time'         => 'time',
+                'user_id'               => 'question_user_id',
+                'teacher_id'            => 'question_teacher_id',
+            );
+            $orderableAnswerKeys = array(
+                'answer_like'           => 'like',
+                'answer_like_virtual'   => 'like_virtual',
+                'answer_listen'         => 'listen',
+                'answer_listen_virtual' => 'listen_virtual'
+            );
             $orderableValues = ['asc', 'desc'];
+            $total = 0;
+            $data = [];
+            $datas = [];
+            $page = intval(Request::get('page'));
+            $number = intval(Request::get('number'));
+            $search = Request::get('search');
+            $index = ($page - 1) * $number;
             $orderKey = Request::get('field');
             $orderValue = Request::get('order');
+            //回答过的
+            if(Request::get('is_answered')){
+                if ($orderKey && $orderValue && in_array($orderKey, array_keys($orderableAnswerKeys)) && $search == ''){
+                //以answer 排序
+                    $query = Answer::with('question')->with('user')->with('teacher');
+                    $total = $query->count();
+                    $query->orderBy($orderableAnswerKeys[$orderKey], $orderValue);
+                    $questions = $query->skip($index)->take($number)->get();
+                    foreach ($questions as $key => $answer) {
+                        $data[] = array(
+                            'question_id'           =>  $answer->question->id,
+                            'question_content'      =>  $answer->question->content,
+                            'question_prize'        =>  $answer->question->prize,
+                            'question_time'         =>  $answer->question->time,
+                            'teacher_id'            =>  $answer->teacher->id,
+                            'teacher_name'          =>  $answer->teacher->wechat,
+                            'teacher_face'          =>  $answer->teacher->face,
+                            'user_id'               =>  $answer->user->id,
+                            'user_name'             =>  $answer->user->wechat,
+                            'user_face'             =>  $answer->user->face,
+                            'answer_listen'         =>  $answer->listen,
+                            'answer_listen_virtual' =>  $answer->listen_virtual,
+                            'answer_like'           =>  $answer->like,
+                            'answer_like_virtual'   =>  $answer->like_virtual,
+                            'answer_audio'          =>  $answer->audio,
+                            'weight'                =>  $answer->question->weight
+                        );
+                    }
+                    $datas['page'] = $page;
+                    $datas['number'] = $number;
+                    $datas['total'] = $total;
+                    $datas['datas'] = $data;
 
-            //搜索功能 排序功能之后加
-			$query = Question::with('answer')
-                ->with('teacher')
-                ->with('user')
-                ->skip($index)
-                ->take($number);
-            if($orderKey && $orderValue && in_array($orderKey, $orderableKeys) && in_array($orderValue, $orderableValues)){
-                $query -> orderBy($orderKey, $orderValue);
-            }
-//            DB::enableQueryLog();
-            $questions = $query->get();
-//            print_r(DB::getQueryLog());
-
-			$datas = array();
-			foreach ($questions as $key => $question) {
-				$data = array(
-					'question_id'           =>  $question->id,
-					'question_content'      =>  $question->content,
-					'question_prize'        =>  $question->prize,
-                    'question_time'         =>  $question->time,
-					'teacher_id'            =>  $question->teacher->id,
-					'teacher_name'          =>  $question->teacher->wechat,
-					'teacher_face'          =>  $question->teacher->face,
-                    'user_id'               =>  $question->user->id,
-                    'user_name'             =>  $question->user->wechat,
-                    'user_face'             =>  $question->user->face,
-                    'is_answered'           =>  $question->isanswered,
-				);
-                if($question->isanswered === 1){
-                    $dataAnswer = array(
-                        'answer_listen'         =>  $question->answer->listen,
-                        'answer_listen_virtual' =>  $question->answer->listen_virtual,
-                        'answer_like'           =>  $question->answer->like,
-                        'answer_like_virtual'   =>  $question->answer->like_virtual,
-                        'answer_audio'          =>  $question->answer->audio,
-                        'weight'                =>  $question->weight
-                    );
-                    $data = array_merge($dataAnswer, $data);
+                }else{
+                    //以question 内容排序和搜索
+                    $query = Question::where('isanswered', 1)
+                        ->with('answer')
+                        ->with('user')
+                        ->with('teacher');
+                    if($search){
+                        $query->Where('content', 'like', "%$search%");
+//                        $query->orWhereHas('user', function($query) use ($search) {
+//                            $query->where('wechat', 'like', "%$search%");
+//                        });
+//                            $query->orWhereHas('teacher', function($query) use ($search) {
+//                                $query->where('wechat', 'like', "%$search%");
+//                            });
+                    }
+                    $total = $query->count();
+                    if($orderKey && $orderValue && in_array($orderKey, array_keys($orderableQuestionKeys)))
+                    $query->orderBy($orderableQuestionKeys[$orderKey], $orderValue);
+                    $questions = $query->skip($index)->take($number)->get();
+                    foreach ($questions as $key => $question) {
+                        $data[] = array(
+                            'question_id'           =>  $question->id,
+                            'question_content'      =>  $question->content,
+                            'question_prize'        =>  $question->prize,
+                            'question_time'         =>  $question->time,
+                            'teacher_id'            =>  $question->teacher->id,
+                            'teacher_name'          =>  $question->teacher->wechat,
+                            'teacher_face'          =>  $question->teacher->face,
+                            'user_id'               =>  $question->user->id,
+                            'user_name'             =>  $question->user->wechat,
+                            'user_face'             =>  $question->user->face,
+                            'answer_listen'         =>  $question->answer->listen,
+                            'answer_listen_virtual' =>  $question->answer->listen_virtual,
+                            'answer_like'           =>  $question->answer->like,
+                            'answer_like_virtual'   =>  $question->answer->like_virtual,
+                            'answer_audio'          =>  $question->answer->audio,
+                            'weight'                =>  $question->weight
+                        );
+                    }
+                    $datas['page'] = $page;
+                    $datas['number'] = $number;
+                    $datas['total'] = $total;
+                    $datas['datas'] = $data;
                 }
-				$datas[] = $data;
-			}
-			return Code::response(0, $datas);
+            }else{
+            //未回答过的
+
+            }
+            return Code::response(0, $datas);
 		} else {
 			return Code::response(100);
 		}
