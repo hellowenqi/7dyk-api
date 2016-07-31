@@ -27,7 +27,7 @@ class QuestionController extends Controller {
                 'question_prize'        => 'prize',
                 'question_time'         => 'time',
                 'user_id'               => 'question_user_id',
-                'teacher_id'            => 'question_teacher_id',
+                'teacher_id'            => 'answer_user_id',
             );
             $orderableAnswerKeys = array(
                 'answer_like'           => 'like',
@@ -46,11 +46,14 @@ class QuestionController extends Controller {
             $orderKey = Request::get('field');
             $orderValue = Request::get('order');
             //回答过的
-            if(Request::get('is_answered')){
+            if(Request::get('is_answered') === 'true'){
                 if ($orderKey && $orderValue && in_array($orderKey, array_keys($orderableAnswerKeys)) && $search == ''){
                 //以answer 排序
                     $query = Answer::with('question')->with('user')->with('teacher');
                     $total = $query->count();
+					if(!in_array($orderValue, $orderableValues)){
+						return Code::response(100, '排序值请输入desc或者asc');
+					}
                     $query->orderBy($orderableAnswerKeys[$orderKey], $orderValue);
                     $questions = $query->skip($index)->take($number)->get();
                     foreach ($questions as $key => $answer) {
@@ -77,7 +80,6 @@ class QuestionController extends Controller {
                     $datas['number'] = $number;
                     $datas['total'] = $total;
                     $datas['datas'] = $data;
-
                 }else{
                     //以question 内容排序和搜索
                     $query = Question::where('isanswered', 1)
@@ -94,7 +96,7 @@ class QuestionController extends Controller {
 //                            });
                     }
                     $total = $query->count();
-                    if($orderKey && $orderValue && in_array($orderKey, array_keys($orderableQuestionKeys)))
+                    if($orderKey && $orderValue && in_array($orderKey, array_keys($orderableQuestionKeys)) && in_array($orderValue, $orderableValues))
                     $query->orderBy($orderableQuestionKeys[$orderKey], $orderValue);
                     $questions = $query->skip($index)->take($number)->get();
                     foreach ($questions as $key => $question) {
@@ -124,7 +126,31 @@ class QuestionController extends Controller {
                 }
             }else{
             //未回答过的
-
+				$query = Question::where('isanswered', 0)->with('user');
+				if($search){
+					$query->Where('content', 'like', "%$search%");
+				}
+				$total = $query->count();
+				array_pop($orderableQuestionKeys);
+				if($orderKey && $orderValue && in_array($orderKey, array_keys($orderableQuestionKeys)) && in_array($orderValue, $orderableValues))
+					$query->orderBy($orderableQuestionKeys[$orderKey], $orderValue);
+				$questions = $query->skip($index)->take($number)->get();
+				$data = array();
+				foreach ($questions as $key => $question) {
+					$data[] = array(
+						'question_id'           =>  $question->id,
+						'question_content'      =>  $question->content,
+						'question_prize'        =>  $question->prize,
+						'question_time'         =>  $question->time,
+						'user_id'               =>  $question->user->id,
+						'user_name'             =>  $question->user->wechat,
+						'user_face'             =>  $question->user->face
+					);
+				}
+				$datas['page'] = $page;
+				$datas['number'] = $number;
+				$datas['total'] = $total;
+				$datas['datas'] = $data;
             }
             return Code::response(0, $datas);
 		} else {
@@ -132,6 +158,36 @@ class QuestionController extends Controller {
 		}
 	}
 
+	/*set order of a question*/
+	public function setQuestionOrder(){
+		if(Request::has('question_id') && Request::has('order')){
+			$id = Request::get('question_id');
+			$order = intval(Request::get('order'));
+			if(!Answer::where('question_id', $id)->first()){
+				return Code::response(201);
+			}
+			if($order === 0){
+				return Code::response(100);
+			}
+			if($this->setOrder($id, $order)){
+				return Code::response(0);
+			}else{
+				return Code::response(404);
+			};
+		}else{
+			return Code::response(100);
+		}
+	}
+	private function setOrder($id, $order){
+		$answer = Answer::where('order', $order)->where('question_id', '!=', $id)->first();
+		if($answer){
+			$this->setOrder($answer->question_id, $order + 1);
+		}
+		$model = Answer::where('question_id', $id)->first();
+		$model->order = $order;
+		$model->save();
+		return true;
+	}
 	/**
 	 * Display a listing of the resource.
 	 *

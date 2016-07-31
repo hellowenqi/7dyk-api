@@ -67,6 +67,12 @@ class Code extends BaseModel {
                 'msg'       =>  '邀请码错误',
                 'data'      =>  $datas,
             );
+        } else if($errCode == 404) {
+            $json = array(
+                'errCode'   =>  404,
+                'msg'       =>  '失败',
+                'data'      =>  $datas,
+            );
         } else {
             $json = array(
                 'errCode'   =>  0,
