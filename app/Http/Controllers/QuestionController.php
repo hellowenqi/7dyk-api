@@ -47,10 +47,12 @@ class QuestionController extends Controller
             $number = Request::get('number');
             $index = ($page - 1) * $number;
             //根据order返回位置
+            //本次排过序的
             $queryOrdered = Question::where('order', '>', $index)->where('order', '<=', $index + $number);
             $countOrdered = $queryOrdered->count();
             $questionsOrdered = $queryOrdered->get();
-            //$queryUnOrdered = Question::where('order')
+            $indexUnOrdered =
+            $queryUnOrdered = Question::where('order', null)->skip()->take($number - $countOrdered);
 
             $questions = Question::where('isanswered', 1)->
             with('answer')->with('teacher.teacher')->orderBy('weight', 'desc')->skip($index)->take($number)->get();
@@ -241,13 +243,16 @@ class QuestionController extends Controller
             $number = Request::get('number');
             $index = ($page - 1) * $number;
             $user_id = Session::get('user_id');
-
+//            $user_id = 33;
             $arr = DB::table('question')->where('question_user_id', $user_id)->orderBy('isanswered', 'desc')->orderBy('time', 'desc')->skip($index)->take($number)->get();
             foreach($arr as $key => $data) {
                 if($data->isanswered == 1) {
                     $answer = Answer::where('id', $data->answer_id)->first();
                     $arr[$key]->listen = $answer->listen;
                     $arr[$key]->like = $answer->like;
+                    $arr[$key]->time = strtotime($answer->time);
+//                    var_dump($arr[$key]->time);
+//                    exit;
                 }
             }
             //返回结果

@@ -167,7 +167,7 @@ class UserController extends Controller {
                 $data['id'] = $question->id;
                 $data['prize'] = $question->prize;
                 $data['content'] = $question->content;
-                $data['time'] = $question->time;
+                $data['time'] = strtotime($question->answer->time);
                 $data['isanswered'] = $question->isanswered;
                 $data['answer_id'] = $question->answer_id;
                 $data['listen'] = $question->answer->listen;
