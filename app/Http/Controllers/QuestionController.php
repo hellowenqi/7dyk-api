@@ -48,11 +48,11 @@ class QuestionController extends Controller
             $index = ($page - 1) * $number;
             //根据order返回位置
             //本次排过序的
-            $queryOrdered = Question::where('order', '>', $index)->where('order', '<=', $index + $number);
-            $countOrdered = $queryOrdered->count();
-            $questionsOrdered = $queryOrdered->get();
-//            $indexUnOrdered =
-            $queryUnOrdered = Question::where('order', null)->skip()->take($number - $countOrdered);
+//            $queryOrdered = Question::where('order', '>', $index)->where('order', '<=', $index + $number);
+//            $countOrdered = $queryOrdered->count();
+//            $questionsOrdered = $queryOrdered->get();
+////            $indexUnOrdered =
+//            $queryUnOrdered = Question::where('order', null)->skip()->take($number - $countOrdered);
 
             $questions = Question::where('isanswered', 1)->
             with('answer')->with('teacher.teacher')->orderBy('weight', 'desc')->skip($index)->take($number)->get();
