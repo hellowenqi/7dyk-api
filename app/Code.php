@@ -55,9 +55,9 @@ class Code extends BaseModel {
                 'msg'       =>  '写入失败',
                 'data'      =>  $datas,
             );
-        } else if($errCode == 303) {
+        } else if($errCode == 304) {
             $json = array(
-                'errCode'   =>  303,
+                'errCode'   =>  304,
                 'msg'       =>  '音频名称错误',
                 'data'      =>  $datas,
             );
@@ -65,6 +65,12 @@ class Code extends BaseModel {
             $json = array(
                 'errCode'   =>  401,
                 'msg'       =>  '邀请码错误',
+                'data'      =>  $datas,
+            );
+        } else if($errCode == 404) {
+            $json = array(
+                'errCode'   =>  404,
+                'msg'       =>  '失败',
                 'data'      =>  $datas,
             );
         } else {

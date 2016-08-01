@@ -67,6 +67,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
     Route::group(['prefix' => 'v1'], function() {
         Route::group(['prefix' => 'question'], function() {
             Route::get('/', 'QuestionController@getList');
+            Route::post('setQuestionOrder', 'QuestionController@setQuestionOrder');
         });
     });
 });
