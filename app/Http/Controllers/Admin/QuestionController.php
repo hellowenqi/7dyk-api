@@ -178,6 +178,37 @@ class QuestionController extends Controller {
 			return Code::response(100);
 		}
 	}
+
+
+	/**
+	 * 设置虚拟的偷听和点赞数
+	 */
+
+	public function setVirtualValue(){
+		if(!Request::has('question_id')) return Code::response(100);
+		$question_id = Request::get('question_id');
+		$model = Answer::where('question_id', $question_id)->first();
+		if(Request::has('answer_listen_virtual') && intval(Request::get('answer_listen_virtual'))){
+			$model->listen_virtual = intval(Request::get('answer_listen_virtual'));
+		}
+
+		if(Request::has('answer_like_virtual') && intval(Request::get('answer_like_virtual'))){
+			$model->like_virtual = intval(Request::get('answer_like_virtual'));
+		}
+		if($model->save()){
+			return Code::response(0);
+		}else{
+			return Code::response(404);
+		}
+	}
+
+
+
+	/**递归的设置问题顺序
+	 * @param $id
+	 * @param $order
+	 * @return bool
+	 */
 	private function setOrder($id, $order){
 		$answer = Answer::where('order', $order)->where('question_id', '!=', $id)->first();
 		if($answer){

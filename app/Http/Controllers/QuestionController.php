@@ -46,6 +46,12 @@ class QuestionController extends Controller
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
+            //根据order返回位置
+            $queryOrdered = Question::where('order', '>', $index)->where('order', '<=', $index + $number);
+            $countOrdered = $queryOrdered->count();
+            $questionsOrdered = $queryOrdered->get();
+            //$queryUnOrdered = Question::where('order')
+
             $questions = Question::where('isanswered', 1)->
             with('answer')->with('teacher.teacher')->orderBy('weight', 'desc')->skip($index)->take($number)->get();
             $datas = array();

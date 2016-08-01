@@ -68,6 +68,11 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
         Route::group(['prefix' => 'question'], function() {
             Route::get('/', 'QuestionController@getList');
             Route::post('setQuestionOrder', 'QuestionController@setQuestionOrder');
+            Route::post('setVirtualValue', 'QuestionController@setVirtualValue');
+            Route::get('time', function(){
+                throw new \Exception("我故意的", 1);
+                return date("Y-m-d H:i:s");
+            });
         });
     });
 });
