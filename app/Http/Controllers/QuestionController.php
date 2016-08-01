@@ -51,7 +51,7 @@ class QuestionController extends Controller
             $queryOrdered = Question::where('order', '>', $index)->where('order', '<=', $index + $number);
             $countOrdered = $queryOrdered->count();
             $questionsOrdered = $queryOrdered->get();
-            $indexUnOrdered =
+//            $indexUnOrdered =
             $queryUnOrdered = Question::where('order', null)->skip()->take($number - $countOrdered);
 
             $questions = Question::where('isanswered', 1)->
