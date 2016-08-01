@@ -1,4 +1,5 @@
 .env
 error.log
 access.log
-.idea
+.idea/
+.ssh/
