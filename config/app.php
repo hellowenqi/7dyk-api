@@ -40,8 +40,8 @@ return [
 	|
 	*/
 
-	'timezone' => 'UTC',
-    /*'timezone' => 'Asia/Shanghai'*/
+	/*'timezone' => 'UTC',*/
+    'timezone' => 'Asia/Shanghai',
 
 	/*
 	|--------------------------------------------------------------------------
