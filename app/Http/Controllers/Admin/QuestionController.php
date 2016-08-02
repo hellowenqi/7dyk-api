@@ -73,6 +73,7 @@ class QuestionController extends Controller {
                             'answer_like'           =>  $answer->like,
                             'answer_like_virtual'   =>  $answer->like_virtual,
                             'answer_audio'          =>  $answer->audio,
+							'answer_order'			=>  $answer->order,
                             'weight'                =>  $answer->weight
                         );
                     }
