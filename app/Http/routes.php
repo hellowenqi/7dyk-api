@@ -26,8 +26,8 @@ Route::post('question', 'QuestionController@index');
 
 Route::group(['prefix' => 'api'], function() {
     Route::group(['prefix' => 'v1'], function() {
-//        Route::group(['middleware' => 'wechatauth'], function() {
-        Route::group([], function() {
+        Route::group(['middleware' => 'wechatauth'], function() {
+//        Route::group([], function() {
             Route::group(['prefix' => 'question'], function() {
                 Route::any('test', 'QuestionController@test');
                 Route::any('gettopic', 'QuestionController@getTopic');
@@ -75,6 +75,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
         Route::group(['prefix' => 'teachers'], function() {
             Route::get('/', 'TeacherController@getList');
             Route::post('setTeacherOrder', 'TeacherController@setQuestionOrder');
+        });
+        Route::group(['prefix' => 'user'], function() {
+            Route::post('generateInvite', 'UserController@generateInvite');
+            Route::post('generateAnonymousInvite', 'UserController@generateAnonymousInvite');
         });
     });
 });

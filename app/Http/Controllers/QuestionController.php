@@ -44,7 +44,6 @@ class QuestionController extends Controller
         DB::enableQueryLog();
         if (Request::has('page') && Request::has('number')) {
             $user_id = Session::get('user_id');
-            $user_id = 33;
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
@@ -77,7 +76,6 @@ class QuestionController extends Controller
             if($oi == $countOrdered) while($ui < $countUnordered){array_push($answers, $answerUnOrdered[$ui++]);};
             if($ui == $countUnordered) while($oi < $countOrdered){array_push($answers, $answerOrdered[$oi++]);;};
             echo count($answers);
-
             $datas = array();
             foreach ($answers as $key => $answer) {
 
