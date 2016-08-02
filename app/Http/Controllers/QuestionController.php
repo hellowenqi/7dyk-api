@@ -75,7 +75,6 @@ class QuestionController extends Controller
             }
             if($oi == $countOrdered) while($ui < $countUnordered){array_push($answers, $answerUnOrdered[$ui++]);};
             if($ui == $countUnordered) while($oi < $countOrdered){array_push($answers, $answerOrdered[$oi++]);;};
-            echo count($answers);
             $datas = array();
             foreach ($answers as $key => $answer) {
 
