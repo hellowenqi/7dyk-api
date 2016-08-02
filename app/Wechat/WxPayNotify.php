@@ -55,12 +55,11 @@ class WxPayNotify extends WxPayNotifyReply
             $teacher->income += $obj->prize;
             $teacher->save();
         } else if($class_name == "App\Models\Listen") {
-            $answer = Answer::with('teacher.teacher')->with('question')->where('id', $obj->answer_id)->first();
+            $answer = Answer::with('teacher.teacher')->where('id', $obj->answer_id)->first();
             $answer->teacher->teacher->income += 10;
             $answer->teacher->teacher->listennum += 1;
             $answer->teacher->teacher->save();
-            $answer->question->weight += 0.6;
-            $answer->question->save();
+            $answer->weight += 0.6;
             $answer->listen += 1;
             $answer->save();
         }

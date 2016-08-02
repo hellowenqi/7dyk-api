@@ -41,47 +41,70 @@ class QuestionController extends Controller
 
     public function getTopic()
     {
+        DB::enableQueryLog();
         if (Request::has('page') && Request::has('number')) {
             $user_id = Session::get('user_id');
+            $user_id = 33;
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
             //根据order返回位置
             //本次排过序的
-            $queryOrdered = Question::where('order', '>', $index)->where('order', '<=', $index + $number);
+            $queryOrdered = Answer::where('order', '>', $index)->where('order', '<=', $index + $number);
             $countOrdered = $queryOrdered->count();
-            $questionsOrdered = $queryOrdered->get();
-            $indexUnOrdered =
-            $queryUnOrdered = Question::where('order', null)->skip()->take($number - $countOrdered);
+            $answerOrdered = ($countOrdered > 0) ? $queryOrdered->with('question')->with('teacher.teacher')->orderBy('order','asc')->get(): array();
+            //之前有order数目：
+            $indexOrdered = Answer::where('order', '<=', $index)->count();
+            $answerUnOrdered = array();
+            $countUnordered = $number - $countOrdered;
+            if($countUnordered > 0){
+                $queryUnOrdered = Answer::where('order', null)->with('question')->with('teacher.teacher')->orderBy('weight', 'desc')->take($countUnordered)->skip($index - $indexOrdered);
+                $answerUnOrdered = $queryUnOrdered->get();
+            }
+            $oi = 0; $ui = 0;
+            $i = 0;
+            $answers = array();
+            while($oi < $countOrdered && $ui < $countUnordered){
+                if($answerOrdered[$oi]->order - $index - 1 == $i){
+                    array_push($answers, $answerOrdered[$oi]);
+                    $oi++;
+                }else{
+                    array_push($answers, $answerUnOrdered[$ui]);
+                    $ui++;
+                }
+                $i++;
+            }
+            if($oi == $countOrdered) while($ui < $countUnordered){array_push($answers, $answerUnOrdered[$ui++]);};
+            if($ui == $countUnordered) while($oi < $countOrdered){array_push($answers, $answerOrdered[$oi++]);;};
+            echo count($answers);
 
-            $questions = Question::where('isanswered', 1)->
-            with('answer')->with('teacher.teacher')->orderBy('weight', 'desc')->skip($index)->take($number)->get();
             $datas = array();
-            foreach ($questions as $key => $question) {
-                $listen = Listen::where('user_id', $user_id)->where('answer_id', $question->answer->id)->first();
+            foreach ($answers as $key => $answer) {
+
+                $listen = Listen::where('user_id', $user_id)->where('answer_id', $answer->id)->first();
                 if(isset($listen)) {
                     $isPayed = 1;
                 } else {
                     $isPayed = 0;
                 }
-                if($question->answer_user_id == $user_id || $question->question_user_id == $user_id) {
+                if($answer->answer_user_id == $user_id || $answer->question_user_id == $user_id) {
                     $isPayed = 1;
                 }
                 $data = array(
-                    'question_id'           =>  $question->id,
-                    'question_content'      =>  $question->content,
-                    'question_prize'        =>  $question->prize,
-                    'teacher_id'            =>  $question->teacher->id,
-                    'teacher_name'          =>  $question->teacher->wechat,
-                    'teacher_company'       =>  $question->teacher->company,
-                    'teacher_position'      =>  $question->teacher->position,
-                    'teacher_experience'    =>  $question->teacher->experience,
-                    'teacher_face'          =>  $question->teacher->face,
-                    'teacher_prize'         =>  $question->teacher->teacher->prize,
-                    'answer_id'             =>  $question->answer->id,
-                    'answer_listen'         =>  $question->answer->listen,
-                    'answer_like'           =>  $question->answer->like,
-                    'answer_audio'          =>  $question->answer->audio,
+                    'question_id'           =>  $answer->question->id,
+                    'question_content'      =>  $answer->question->content,
+                    'question_prize'        =>  $answer->question->prize,
+                    'teacher_id'            =>  $answer->question->teacher->id,
+                    'teacher_name'          =>  $answer->teacher->wechat,
+                    'teacher_company'       =>  $answer->teacher->company,
+                    'teacher_position'      =>  $answer->teacher->position,
+                    'teacher_experience'    =>  $answer->teacher->experience,
+                    'teacher_face'          =>  $answer->teacher->face,
+                    'teacher_prize'         =>  $answer->teacher->teacher->prize,
+                    'answer_id'             =>  $answer->id,
+                    'answer_listen'         =>  $answer->listen,
+                    'answer_like'           =>  $answer->like,
+                    'answer_audio'          =>  $answer->audio,
                     'answer_ispayed'        =>  $isPayed,
                 );
                 $datas[] = $data;
@@ -174,7 +197,6 @@ class QuestionController extends Controller
             $data['answer_user_id'] = Request::input('answer_user_id');
             $data['question_user_id'] = Request::input('question_user_id');
             $data['isanswered'] = 0;
-            $data['weight'] = 0;
             $data['answer_id'] = 0;
             $data['time'] = date("Y-m-d H:i:s", time());
 
@@ -225,7 +247,6 @@ class QuestionController extends Controller
             $question->answer_user_id = $answer_user_id;
             $question->question_user_id = $user_id;
             $question->isanswered = 0;
-            $question->weight = 0;
             $question->answer_id = 0;
             $question->time = date("Y-m-d H:i:s", time());
             Cache::put($name, $question, 10);
@@ -336,13 +357,12 @@ class QuestionController extends Controller
         if(Request::has('answer_id')) {
             $id = Request::get('answer_id');
             $user_id = Session::get('user_id');
-            $answer = Answer::with('question')->find($id);
+            $answer = Answer::find($id);
             $like = Like::where('answer_id', $id)->where('user_id', $user_id)->first();
             if(isset($answer) && !isset($like)){
                 $answer->like += 1;
+                $answer->weight += 0.4;
                 $answer->save();
-                $answer->question->weight += 0.4;
-                $answer->question->save();
                 $like = new Like();
                 $like->answer_id = $id;
                 $like->user_id = $user_id;

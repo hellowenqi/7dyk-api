@@ -73,7 +73,7 @@ class QuestionController extends Controller {
                             'answer_like'           =>  $answer->like,
                             'answer_like_virtual'   =>  $answer->like_virtual,
                             'answer_audio'          =>  $answer->audio,
-                            'weight'                =>  $answer->question->weight
+                            'weight'                =>  $answer->weight
                         );
                     }
                     $datas['page'] = $page;
@@ -116,7 +116,7 @@ class QuestionController extends Controller {
                             'answer_like'           =>  $question->answer->like,
                             'answer_like_virtual'   =>  $question->answer->like_virtual,
                             'answer_audio'          =>  $question->answer->audio,
-                            'weight'                =>  $question->weight
+                            'weight'                =>  $question->answer->weight
                         );
                     }
                     $datas['page'] = $page;
@@ -156,6 +156,32 @@ class QuestionController extends Controller {
 		} else {
 			return Code::response(100);
 		}
+	}
+
+	public function questionModify(){
+		if(!Request::has('question_id')) return Code::response(100);
+		$question_id = Request::get('question_id');
+		//修改顺序
+		if(Request::has('order')){
+			$order = intval(Request::get('order'));
+			if($order === 0){
+				return Code::response(100);
+			}
+			if(!Answer::where('question_id', $question_id)->first()){
+				return Code::response(201);
+			}
+			$this->setOrder($question_id, $order);
+		}
+		$model = Answer::where('question_id', $question_id)->first();
+		if(Request::has('answer_listen_virtual') && intval(Request::get('answer_listen_virtual'))){
+			$model->listen_virtual = intval(Request::get('answer_listen_virtual'));
+		}
+
+		if(Request::has('answer_like_virtual') && intval(Request::get('answer_like_virtual'))){
+			$model->like_virtual = intval(Request::get('answer_like_virtual'));
+		}
+		$model->save();
+		return Code::response(0);
 	}
 
 	/*set order of a question*/
