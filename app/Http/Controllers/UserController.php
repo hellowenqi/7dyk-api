@@ -184,18 +184,20 @@ class UserController extends Controller {
         if(Request::has('invite') && Request::has('prize')) {
             $invite_code = Request::get('invite');
             $prize = Request::get('prize');
-            $invite = Invite::with('user')->where("invite", $invite_code)->first();
+            $user_id = Session::get('user_id');
+            $invite = Invite::where("invite", $invite_code)->first();
             if(!isset($invite)) {
                 return Code::response(401);
             }
-            $invite->user->isteacher = 1;
-            $invite->user->save();
+            $user = User::find($user_id);
+            $user->isteacher = 1;
+            $user->save();
             $teacher = new Teacher();
             $teacher->prize = $prize;
             $teacher->answernum = 0;
             $teacher->listennum = 0;
             $teacher->income = 0;
-            $teacher->user_id = $invite->user->id;
+            $teacher->user_id = $user_id;
             $teacher->save();
             $invite->delete();
             return Code::response(0, $invite->user);
