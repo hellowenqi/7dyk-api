@@ -33,7 +33,8 @@ class QuestionController extends Controller {
                 'answer_like'           => 'like',
                 'answer_like_virtual'   => 'like_virtual',
                 'answer_listen'         => 'listen',
-                'answer_listen_virtual' => 'listen_virtual'
+                'answer_listen_virtual' => 'listen_virtual',
+				'answer_order'			=> 'order'
             );
             $orderableValues = ['asc', 'desc'];
             $total = 0;
