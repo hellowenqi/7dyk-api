@@ -44,6 +44,7 @@ class QuestionController extends Controller
         DB::enableQueryLog();
         if (Request::has('page') && Request::has('number')) {
             $user_id = Session::get('user_id');
+//            $user_id = 33;
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
