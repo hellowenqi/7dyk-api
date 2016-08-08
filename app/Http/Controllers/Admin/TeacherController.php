@@ -178,5 +178,9 @@ class TeacherController extends Controller {
 	{
 		//
 	}
+    public function test(){
+        $id = 33;
+        
+    }
 
 }

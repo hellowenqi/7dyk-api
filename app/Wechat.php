@@ -128,6 +128,20 @@ class Wechat extends BaseModel {
         return $response;
     }
 
+    /**
+     * @param $openId 用户的OpenId
+     * @param $data   发送的内容
+     * @param $redirectUrl  回调的Url
+     * @param $type   消息类型
+     */
+    public function sendMessage($openId, $data, $redirectUrl, $type){
+        $curl = new Curl();
+        $token = $this->getToken();
+
+        $curl->post("https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=$token",
+            json_encode($data), JSON_UNESCAPED_UNICODE);
+        $curl->response;
+    }
 	private function getToken() {
 		if(Cache::has('token')) {
 		    return Cache::get('token');

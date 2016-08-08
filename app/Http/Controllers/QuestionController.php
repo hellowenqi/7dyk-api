@@ -61,6 +61,7 @@ class QuestionController extends Controller
                 $queryUnOrdered = Answer::where('order', null)->with('question')->with('teacher.teacher')->orderBy('weight', 'desc')->take($countUnordered)->skip($index - $indexOrdered);
                 $answerUnOrdered = $queryUnOrdered->get();
             }
+            $countUnordered = count($answerUnOrdered);
             $oi = 0; $ui = 0;
             $i = 0;
             $answers = array();
@@ -78,7 +79,6 @@ class QuestionController extends Controller
             if($ui == $countUnordered) while($oi < $countOrdered){array_push($answers, $answerOrdered[$oi++]);;};
             $datas = array();
             foreach ($answers as $key => $answer) {
-
                 $listen = Listen::where('user_id', $user_id)->where('answer_id', $answer->id)->first();
                 if(isset($listen)) {
                     $isPayed = 1;
