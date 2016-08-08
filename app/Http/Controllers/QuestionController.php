@@ -374,6 +374,26 @@ class QuestionController extends Controller
             return Code::response(100);
         }
     }
+    public function cancelLike(){
+        if(Request::has('answer_id')) {
+            $id = Request::get('answer_id');
+            $user_id = Session::get('user_id');
+            $user_id = 33;
+            $answer = Answer::find($id);
+            $like = Like::where('answer_id', $id)->where('user_id', $user_id)->first();
+            if(isset($answer) && isset($like)){
+                $answer->like -= 1;
+                $answer->weight -= 0.4;
+                $answer->save();
+                $like->delete();
+                return Code::response(0, $answer);
+            } else {
+                return Code::response(100, '没有点过赞');
+            }
+        } else {
+            return Code::response(100);
+        }
+    }
     //不喜欢这个回答的人数
     public function dislike(){
         $answer_id = session("id");
