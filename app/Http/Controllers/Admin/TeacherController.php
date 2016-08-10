@@ -5,7 +5,7 @@
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 //use App\Models\Answer;
-use App\Models\Question;
+use App\Models\User;
 use App\Models\Teacher;
 use App\Code;
 use Request;
@@ -37,68 +37,70 @@ class TeacherController extends Controller {
             $orderKey = Request::get('field');
             $orderValue = Request::get('order');
 
-            if ($orderKey && $orderValue && in_array($orderKey, array_keys($orderableTeacherKeys)) && $search == ''){
-                //为teacher 排序
-                $query = Teacher::with('user');
-                $total = $query->count();
+            $query = Teacher::with('user');
 
-                if(!in_array($orderValue, $orderableValues)){
-                    return Code::response(100, '排序值请输入desc或者asc');
-                }
+           if($search) {
+               $query =$query->wherehas('user',function($query) use($search){
+                    $query->where('wechat', 'like', "%$search%");
+                });
+
+           }
+
+            $total = $query->count();
+
+            if ($orderKey && $orderValue && in_array($orderKey, array_keys($orderableTeacherKeys)) && in_array($orderValue, $orderableValues)){
 
                 $query->orderBy($orderableTeacherKeys[$orderKey], $orderValue);
 
-                $teachers = $query->skip($index)->take($number)->get();
-
-                foreach ($teachers as $key => $teacher) {
-                    $data[] = array(
-                        'listener_number'           =>  $teacher->listennum,
-                        'question_prize'            =>  $teacher->prize,
-                        'answer_number'             =>  $teacher->answernum,
-                        'answer_income'             =>  $teacher->income,
-                        'user_id'                   =>  $teacher->user->id,
-                    );
-                }
-
-                $datas['page'] = $page;
-                $datas['number'] = $number;
-                $datas['total'] = $total;
-                $datas['datas'] = $data;
-            }else{
-                //teacher搜索
-                $query = Teacher::with('user');
-                $searchField=Request::get('searchfield');
-                if($search){
-                    $query->Where($searchField, '<', "$search");//搜索方式，，，
-                }
-
-
-                $total = $query->count();
-
-
-                if ($orderKey && $orderValue && in_array($orderKey, array_keys($orderableTeacherKeys)) && in_array($orderValue, $orderableValues))
-                $query->orderBy($orderableTeacherKeys[$orderKey], $orderValue);
-
-                $teachers = $query->skip($index)->take($number)->get();
-
-                foreach ($teachers as $key => $teacher) {
-                    $data[] = array(
-                        'listener_number'           =>  $teacher->listennum,
-                        'question_prize'            =>  $teacher->prize,
-                        'answer_number'             =>  $teacher->answernum,
-                        'answer_income'             =>  $teacher->income,
-                        'user_id'                   =>  $teacher->user->id,
-                    );
-                }
-
-                $datas['page'] = $page;
-                $datas['number'] = $number;
-                $datas['total'] = $total;
-                $datas['datas'] = $data;
             }
+
+            $teachers = $query->skip($index)->take($number)->get();
+
+
+            foreach ($teachers as $key => $teacher) {
+
+                $data[] = array(
+                    'listener_number'   =>  $teacher->listennum,
+                    'question_prize'    =>  $teacher->prize,
+                    'answer_number'     =>  $teacher->answernum,
+                    'answer_income'     =>  $teacher->income,
+                    'teacher_id'        =>  $teacher->id,
+                    'teacher_wechat'    =>  $teacher->user->wechat,
+                    'teacher_company'   =>  $teacher->user->company,
+                );
+            }
+
+            $datas['page'] = $page;
+            $datas['number'] = $number;
+            $datas['total'] = $total;
+            $datas['datas'] = $data;
             return Code::response(0, $datas);
+
         } else {
             return Code::response(100);
+        }
+    }
+
+
+    public function setVirtualValue(){
+        if(!Request::has('teacher_id')) return Code::response(100);
+        $teacher_id = Request::get('teacher_id');
+        $model = Teacher::where('id', $teacher_id)->first();
+        if(!$model) return Code::response(102);
+        if(Request::has('teacher_listen_virtual') && intval(Request::get('teacher_listen_virtual'))){
+            $model->listen_virtual = intval(Request::get('teacher_listen_virtual'));
+        }
+
+        if(Request::has('teacher_like_virtual') && intval(Request::get('teacher_like_virtual'))){
+            $model->like_virtual = intval(Request::get('teacher_like_virtual'));
+        }
+        if(Request::has('teacher_answernum_virtual') && intval(Request::get('teacher_answernum_virtual'))){
+            $model->answernum_virtual = intval(Request::get('teacher_answernum_virtual'));
+        }
+        if($model->save()){
+            return Code::response(0);
+        }else{
+            return Code::response(404);
         }
     }
 
