@@ -77,6 +77,11 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
             //Route::post('setTeacherOrder', 'TeacherController@setQuestionOrder');
             Route::get('setteachervirtual', 'TeacherController@setVirtualValue');
         });
+        Route::group(['prefix' => 'login'], function() {
+            Route::any('/', 'LoginController@login');
+            Route::get('/code','LoginController@code');
+        });
+
         Route::group(['prefix' => 'user'], function() {
             Route::post('generateInvite', 'UserController@generateInvite');
             Route::post('generateAnonymousInvite', 'UserController@generateAnonymousInvite');

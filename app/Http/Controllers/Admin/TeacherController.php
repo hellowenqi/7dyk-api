@@ -21,10 +21,13 @@ class TeacherController extends Controller {
         if (Request::has('page') && Request::has('number')) {
 
             $orderableTeacherKeys=array(
-                'listener_number'     =>'listennum',
-                'question_prize'      =>'prize',
-                'answer_number'       =>'answernum',
-                'answer_income'       =>'income'
+                'listener_number'       =>'listennum',
+                'question_prize'        =>'prize',
+                'answer_number'         =>'answernum',
+                'answer_income'         =>'income',
+                'answer_number_virtual' =>'answernum_virtual',
+                'listen_number_virtual' =>'listennum_virtual',
+                'question_prize_virtual'=>'prize_virtual',
             );
             $orderableValues = ['asc', 'desc'];
             $data = [];
@@ -60,13 +63,17 @@ class TeacherController extends Controller {
             foreach ($teachers as $key => $teacher) {
 
                 $data[] = array(
-                    'listener_number'   =>  $teacher->listennum,
-                    'question_prize'    =>  $teacher->prize,
-                    'answer_number'     =>  $teacher->answernum,
-                    'answer_income'     =>  $teacher->income,
-                    'teacher_id'        =>  $teacher->id,
-                    'teacher_wechat'    =>  $teacher->user->wechat,
-                    'teacher_company'   =>  $teacher->user->company,
+                    'listener_number'       =>  $teacher->listennum,
+                    'question_prize'        =>  $teacher->prize,
+                    'answer_number'         =>  $teacher->answernum,
+                    'answer_income'         =>  $teacher->income,
+                    'teacher_id'            =>  $teacher->id,
+                    'answer_number_virtual' =>  $teacher->answernum_virtual,
+                    'listen_number_virtual' =>  $teacher->listennum_virtual,
+                    'question_prize_virtual'=>  $teacher->prize_virtual,
+                    'teacher_wechat'        =>  $teacher->user->wechat,
+                    'teacher_company'       =>  $teacher->user->company,
+
                 );
             }
 
