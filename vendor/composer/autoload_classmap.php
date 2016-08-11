@@ -6,7 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-<<<<<<< HEAD
     'AddColumnsToTeacher' => $baseDir . '/database/migrations/2016_08_09_101629_add_columns_to_teacher.php',
     'Alchemy\\BinaryDriver\\AbstractBinary' => $vendorDir . '/alchemy/binary-driver/src/Alchemy/BinaryDriver/AbstractBinary.php',
     'Alchemy\\BinaryDriver\\BinaryDriverTestCase' => $vendorDir . '/alchemy/binary-driver/src/Alchemy/BinaryDriver/BinaryDriverTestCase.php',
@@ -43,6 +42,7 @@ return array(
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
     'App\\Http\\Controllers\\HomeController' => $baseDir . '/app/Http/Controllers/HomeController.php',
     'App\\Http\\Controllers\\QuestionController' => $baseDir . '/app/Http/Controllers/QuestionController.php',
+    'App\\Http\\Controllers\\TimerController' => $baseDir . '/app/Http/Controllers/TimerController.php',
     'App\\Http\\Controllers\\UserController' => $baseDir . '/app/Http/Controllers/UserController.php',
     'App\\Http\\Controllers\\WelcomeController' => $baseDir . '/app/Http/Controllers/WelcomeController.php',
     'App\\Http\\Kernel' => $baseDir . '/app/Http/Kernel.php',
@@ -58,6 +58,7 @@ return array(
     'App\\Models\\Like' => $baseDir . '/app/Models/Like.php',
     'App\\Models\\Listen' => $baseDir . '/app/Models/Listen.php',
     'App\\Models\\Question' => $baseDir . '/app/Models/Question.php',
+    'App\\Models\\QuestionExpired' => $baseDir . '/app/Models/QuestionExpired.php',
     'App\\Models\\Teacher' => $baseDir . '/app/Models/Teacher.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
@@ -105,10 +106,7 @@ return array(
     'ClassPreloader\\Parser\\FileVisitor' => $vendorDir . '/classpreloader/classpreloader/src/Parser/FileVisitor.php',
     'ClassPreloader\\Parser\\NodeTraverser' => $vendorDir . '/classpreloader/classpreloader/src/Parser/NodeTraverser.php',
     'Collator' => $vendorDir . '/symfony/intl/Resources/stubs/Collator.php',
-=======
->>>>>>> 7826d7435f20b88c2dc302445fd0a38be256193a
     'CreatePasswordResetsTable' => $baseDir . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
-    'CreateQuestionExpiredsTable' => $baseDir . '/database/migrations/2016_08_04_223405_create_question_expireds_table.php',
     'CreateUsersTable' => $baseDir . '/database/migrations/2014_10_12_000000_create_users_table.php',
     'Cron\\AbstractField' => $vendorDir . '/mtdowling/cron-expression/src/Cron/AbstractField.php',
     'Cron\\CronExpression' => $vendorDir . '/mtdowling/cron-expression/src/Cron/CronExpression.php',

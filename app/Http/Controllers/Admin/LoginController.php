@@ -4,7 +4,8 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
-
+use Gregwar\Captcha\CaptchaBuilder;
+use Illuminate\Support\Facades\Session;
 require_once 'code/Code.class.php';
 
 class LoginController extends Controller {
@@ -17,9 +18,7 @@ class LoginController extends Controller {
 
 	public function  login(){
         if($input=Input::all()){
-            $codes = new \Code;
-            $code=$codes->get();
-
+            $code=Session::get('milkcaptcha');
             if($input['code']!=$code){
                 return back()->with('msg','验证码错误');
             }else {
@@ -31,8 +30,11 @@ class LoginController extends Controller {
     }
 
     public function code(){
-        $code =new \Code;
-        $code->make();
+        $test=new CaptchaBuilder;
+        $test->build();
+        $phrase=$test->getPhrase();
+        Session::flash('milkcaptcha', $phrase);
+        $test->output();
     }
 
 
