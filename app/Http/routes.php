@@ -22,8 +22,6 @@ Route::get('/', 'WelcomeController@index');
 
 Route::get('home', 'HomeController@index');
 Route::post('question', 'QuestionController@index');
-
-
 Route::group(['prefix' => 'api'], function() {
     Route::group(['prefix' => 'v1'], function() {
         Route::group(['middleware' => 'wechatauth'], function() {
@@ -39,6 +37,7 @@ Route::group(['prefix' => 'api'], function() {
                 Route::any('mylisten', 'QuestionController@myListen');
                 Route::any('dislike', 'QuestionController@dislike');
                 Route::any('like', 'QuestionController@like');
+                Route::any('cancelLike', 'QuestionController@cancelLike');
                 Route::any('weight', 'QuestionController@weight');
                 Route::any('teacher_question', 'QuestionController@teacher_question');
             });
@@ -87,4 +86,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
             Route::post('generateAnonymousInvite', 'UserController@generateAnonymousInvite');
         });
     });
+});
+//定时器
+Route::group(['prefix' => 'timer'], function() {
+    Route::get('checkExpired', 'TimerController@checkExpired');
 });

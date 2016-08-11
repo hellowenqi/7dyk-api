@@ -33,7 +33,8 @@ class QuestionController extends Controller {
                 'answer_like'           => 'like',
                 'answer_like_virtual'   => 'like_virtual',
                 'answer_listen'         => 'listen',
-                'answer_listen_virtual' => 'listen_virtual'
+                'answer_listen_virtual' => 'listen_virtual',
+				'answer_order'			=> 'order'
             );
             $orderableValues = ['asc', 'desc'];
             $total = 0;
@@ -216,6 +217,7 @@ class QuestionController extends Controller {
 		if(!Request::has('question_id')) return Code::response(100);
 		$question_id = Request::get('question_id');
 		$model = Answer::where('question_id', $question_id)->first();
+		if(!$model) return Code::response(201);
 		if(Request::has('answer_listen_virtual') && intval(Request::get('answer_listen_virtual'))){
 			$model->listen_virtual = intval(Request::get('answer_listen_virtual'));
 		}

@@ -93,6 +93,7 @@ class TeacherController extends Controller {
         if(!Request::has('teacher_id')) return Code::response(100);
         $teacher_id = Request::get('teacher_id');
         $model = Teacher::where('id', $teacher_id)->first();
+        if(!$model) return Code::response(102);
         if(Request::has('teacher_listen_virtual') && intval(Request::get('teacher_listen_virtual'))){
             $model->listen_virtual = intval(Request::get('teacher_listen_virtual'));
         }
@@ -186,5 +187,9 @@ class TeacherController extends Controller {
 	{
 		//
 	}
+    public function test(){
+        $id = 33;
+        
+    }
 
 }

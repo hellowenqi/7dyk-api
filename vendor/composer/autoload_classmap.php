@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+<<<<<<< HEAD
     'AddColumnsToTeacher' => $baseDir . '/database/migrations/2016_08_09_101629_add_columns_to_teacher.php',
     'Alchemy\\BinaryDriver\\AbstractBinary' => $vendorDir . '/alchemy/binary-driver/src/Alchemy/BinaryDriver/AbstractBinary.php',
     'Alchemy\\BinaryDriver\\BinaryDriverTestCase' => $vendorDir . '/alchemy/binary-driver/src/Alchemy/BinaryDriver/BinaryDriverTestCase.php',
@@ -104,7 +105,10 @@ return array(
     'ClassPreloader\\Parser\\FileVisitor' => $vendorDir . '/classpreloader/classpreloader/src/Parser/FileVisitor.php',
     'ClassPreloader\\Parser\\NodeTraverser' => $vendorDir . '/classpreloader/classpreloader/src/Parser/NodeTraverser.php',
     'Collator' => $vendorDir . '/symfony/intl/Resources/stubs/Collator.php',
+=======
+>>>>>>> 7826d7435f20b88c2dc302445fd0a38be256193a
     'CreatePasswordResetsTable' => $baseDir . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
+    'CreateQuestionExpiredsTable' => $baseDir . '/database/migrations/2016_08_04_223405_create_question_expireds_table.php',
     'CreateUsersTable' => $baseDir . '/database/migrations/2014_10_12_000000_create_users_table.php',
     'Cron\\AbstractField' => $vendorDir . '/mtdowling/cron-expression/src/Cron/AbstractField.php',
     'Cron\\CronExpression' => $vendorDir . '/mtdowling/cron-expression/src/Cron/CronExpression.php',

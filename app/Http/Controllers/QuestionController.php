@@ -61,6 +61,7 @@ class QuestionController extends Controller
                 $queryUnOrdered = Answer::where('order', null)->with('question')->with('teacher.teacher')->orderBy('weight', 'desc')->take($countUnordered)->skip($index - $indexOrdered);
                 $answerUnOrdered = $queryUnOrdered->get();
             }
+            $countUnordered = count($answerUnOrdered);
             $oi = 0; $ui = 0;
             $i = 0;
             $answers = array();
@@ -78,7 +79,6 @@ class QuestionController extends Controller
             if($ui == $countUnordered) while($oi < $countOrdered){array_push($answers, $answerOrdered[$oi++]);;};
             $datas = array();
             foreach ($answers as $key => $answer) {
-
                 $listen = Listen::where('user_id', $user_id)->where('answer_id', $answer->id)->first();
                 if(isset($listen)) {
                     $isPayed = 1;
@@ -369,6 +369,26 @@ class QuestionController extends Controller
                 return Code::response(0, $answer);
             } else {
                 return Code::response(100, $like);
+            }
+        } else {
+            return Code::response(100);
+        }
+    }
+    public function cancelLike(){
+        if(Request::has('answer_id')) {
+            $id = Request::get('answer_id');
+            $user_id = Session::get('user_id');
+//            $user_id = 33;
+            $answer = Answer::find($id);
+            $like = Like::where('answer_id', $id)->where('user_id', $user_id)->first();
+            if(isset($answer) && isset($like)){
+                $answer->like -= 1;
+                $answer->weight -= 0.4;
+                $answer->save();
+                $like->delete();
+                return Code::response(0, $answer);
+            } else {
+                return Code::response(100, '没有点过赞');
             }
         } else {
             return Code::response(100);
