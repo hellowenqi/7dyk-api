@@ -3,3 +3,4 @@ error.log
 access.log
 .idea/
 .ssh/
+vendor/
