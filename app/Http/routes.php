@@ -90,4 +90,5 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
 //定时器
 Route::group(['prefix' => 'timer'], function() {
     Route::get('checkExpired', 'TimerController@checkExpired');
+    Route::get('getUserInfo', 'TimerController@getUserInfo');
 });

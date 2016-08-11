@@ -5,7 +5,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Question;
 use App\Models\QuestionExpired;
 use Illuminate\Http\Request;
-
+use App\Wechat;
+use Curl\Curl;
 class TimerController extends Controller {
 
 	/**
@@ -32,6 +33,14 @@ class TimerController extends Controller {
 				exit;
 			}
 		});
+	}
+	public function getUserInfo(){
+
+		$wechat = new Wechat();
+		$wechat->getToken();
+//		$user = $wechat->getUserinfo('0P-ewJsLELyhduFbXcSZbgN6w1T_T7ihgBEDPKykp4pci7sUlF8z2LglJPlmC8owZGmYkwGX6qcxnEML_6ZvfhLKiVcxiXjhcketWUW9z1ufE-VVpJeQLZmg9_nEGL_kDQThACAUHK', 'on7OgwuImaOsx_i0mUkt9aW_nMcI');
+//		var_dump($user);
+		
 	}
 
 }
