@@ -9,7 +9,6 @@
 		"php-curl-class/php-curl-class": "^4.11",
 		"qiniu/php-sdk": "^7.0",
 		"php-ffmpeg/php-ffmpeg": "~0.5",
-		"mews/captcha": "^2.1",
 		"gregwar/captcha": "^1.1"
 	},
 	"require-dev": {

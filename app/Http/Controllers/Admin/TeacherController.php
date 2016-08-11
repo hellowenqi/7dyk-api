@@ -89,20 +89,27 @@ class TeacherController extends Controller {
     }
 
 
-    public function setVirtualValue(){
+    public function teacherModify(){
         if(!Request::has('teacher_id')) return Code::response(100);
         $teacher_id = Request::get('teacher_id');
         $model = Teacher::where('id', $teacher_id)->first();
         if(!$model) return Code::response(102);
-        if(Request::has('teacher_listen_virtual') && intval(Request::get('teacher_listen_virtual'))){
-            $model->listen_virtual = intval(Request::get('teacher_listen_virtual'));
+        if(Request::has('order')){
+            $order = intval(Request::get('order'));
+            if($order === 0){
+                return Code::response(100);
+            }
+            $model->order = $order;
+        }
+        if(Request::has('listen_number_virtual') && intval(Request::get('listen_number_virtual'))){
+            $model->listennum_virtual = intval(Request::get('listen_number_virtual'));
         }
 
-        if(Request::has('teacher_like_virtual') && intval(Request::get('teacher_like_virtual'))){
-            $model->like_virtual = intval(Request::get('teacher_like_virtual'));
+        if(Request::has('question_prize_virtual') && intval(Request::get('question_prize_virtual'))){
+            $model->prize_virtual = intval(Request::get('question_prize_virtual'));
         }
-        if(Request::has('teacher_answernum_virtual') && intval(Request::get('teacher_answernum_virtual'))){
-            $model->answernum_virtual = intval(Request::get('teacher_answernum_virtual'));
+        if(Request::has('answer_number_virtual') && intval(Request::get('answer_number_virtual'))){
+            $model->answernum_virtual = intval(Request::get('answer_number_virtual'));
         }
         if($model->save()){
             return Code::response(0);
