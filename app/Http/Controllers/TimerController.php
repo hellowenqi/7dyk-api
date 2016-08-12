@@ -1,5 +1,5 @@
 <?php namespace App\Http\Controllers;
-
+use Crypt;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Models\Question;
@@ -7,6 +7,7 @@ use App\Models\QuestionExpired;
 use Illuminate\Http\Request;
 use App\Wechat;
 use Curl\Curl;
+use App\Models\Admin;
 class TimerController extends Controller {
 
 	/**
@@ -35,12 +36,10 @@ class TimerController extends Controller {
 		});
 	}
 	public function getUserInfo(){
-
-		$wechat = new Wechat();
-		$wechat->getToken();
-//		$user = $wechat->getUserinfo('0P-ewJsLELyhduFbXcSZbgN6w1T_T7ihgBEDPKykp4pci7sUlF8z2LglJPlmC8owZGmYkwGX6qcxnEML_6ZvfhLKiVcxiXjhcketWUW9z1ufE-VVpJeQLZmg9_nEGL_kDQThACAUHK', 'on7OgwuImaOsx_i0mUkt9aW_nMcI');
-//		var_dump($user);
-		
+		$model = new Admin();
+		$model->username = '7dyk';
+		$model->password = Crypt::encrypt(md5('7dykadmin23!@#'));
+		var_dump($model->save());
 	}
 
 }
