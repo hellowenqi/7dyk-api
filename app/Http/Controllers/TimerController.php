@@ -37,8 +37,8 @@ class TimerController extends Controller {
 	}
 	public function getUserInfo(){
 		$model = new Admin();
-		$model->username = '7dyk';
-		$model->password = Crypt::encrypt(md5('7dykadmin23!@#'));
+		$model->username = '7dykadmin';
+		$model->password = md5(md5('7dykadmin123!@#'));
 		var_dump($model->save());
 	}
 

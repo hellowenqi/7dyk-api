@@ -65,25 +65,26 @@ Route::group(['prefix' => 'api'], function() {
 //后台管理员
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
     Route::group(['prefix' => 'v1'], function() {
-        Route::group(['prefix' => 'question'], function() {
-            Route::get('/', 'QuestionController@getList');
-            Route::post('setQuestionOrder', 'QuestionController@setQuestionOrder');
-            Route::post('setVirtualValue', 'QuestionController@setVirtualValue');
-            Route::post('questionModify', 'QuestionController@questionModify');
-        });
-        Route::group(['prefix' => 'teachers'], function() {
-            Route::get('/', 'TeacherController@getList');
-            //Route::post('setTeacherOrder', 'TeacherController@setQuestionOrder');
-            Route::post('teacherModify', 'TeacherController@teacherModify');
+        Route::group(['middleware' => 'adminauth'],function(){
+//        Route::group([],function(){
+            Route::group(['prefix' => 'question'], function() {
+                Route::get('/', 'QuestionController@getList');
+                Route::post('setQuestionOrder', 'QuestionController@setQuestionOrder');
+                Route::post('setVirtualValue', 'QuestionController@setVirtualValue');
+                Route::post('questionModify', 'QuestionController@questionModify');
+            });
+            Route::group(['prefix' => 'teachers'], function() {
+                Route::get('/', 'TeacherController@getList');
+                Route::post('teacherModify', 'TeacherController@teacherModify');
+            });
+            Route::group(['prefix' => 'user'], function() {
+                Route::post('generateInvite', 'UserController@generateInvite');
+                Route::post('generateAnonymousInvite', 'UserController@generateAnonymousInvite');
+            });
         });
         Route::group(['prefix' => 'login'], function() {
-            Route::any('/', 'LoginController@login');
+            Route::post('/', 'LoginController@login');
             Route::get('/code','LoginController@code');
-        });
-
-        Route::group(['prefix' => 'user'], function() {
-            Route::post('generateInvite', 'UserController@generateInvite');
-            Route::post('generateAnonymousInvite', 'UserController@generateAnonymousInvite');
         });
     });
 });
