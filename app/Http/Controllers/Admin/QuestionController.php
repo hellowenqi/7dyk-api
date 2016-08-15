@@ -71,7 +71,7 @@ class QuestionController extends Controller {
                             'user_face'             =>  $answer->user->face,
                             'answer_listen'         =>  $answer->listen,
                             'answer_listen_virtual' =>  $answer->listen_virtual,
-                            'answer_like'           =>  $answer->like,
+                            'answer_like'           =>  $answer->like_virtual == 0  ? $answer->like : $answer->like_virtual,
                             'answer_like_virtual'   =>  $answer->like_virtual,
                             'answer_audio'          =>  $answer->audio,
 							'answer_order'			=>  $answer->order,

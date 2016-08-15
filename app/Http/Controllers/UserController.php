@@ -121,6 +121,7 @@ class UserController extends Controller {
 
     public function editUsernow() {
         $id = Session::get('user_id');
+//        $id = 33;
         $user = User::where('id', $id)->first();
         if(Request::has("company")) {
             $company = Request::get('company');
@@ -137,6 +138,14 @@ class UserController extends Controller {
         if(Request::has("introduction")) {
             $introduction = Request::get('introduction');
             $user->introduction = $introduction;
+        }
+        if(Request::has("prize")) {
+            $teacher = Teacher::where('user_id', $id)->first();
+            if(!$teacher){
+                return Code::response(103);
+            }
+            $teacher->prize = Request::get('prize');
+            $teacher->save();
         }
         $user->save();
         return Code::response(0, $user);
@@ -159,8 +168,8 @@ class UserController extends Controller {
                     'user_introduction' =>  $user->introduction,
                     'teacher_income'    =>  $user->teacher->income,
                     'teacher_prize'     =>  $user->teacher->prize,
-                    'listen_num'        =>  $user->teacher->listennum,
-                    'answer_num'        =>  $user->teacher->answernum,
+                    'listen_num'        =>  ($user->teacher->listennum_virtual == 0) ? $user->teacher->listennum : $user->teacher->listennum_virtual,
+                    'answer_num'        =>  ($user->teacher->answernum_virtual == 0) ? $user->teacher->answernum : $user->teacher->answernum_virtual,
                 );
             } else {
                 $data = array(
