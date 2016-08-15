@@ -100,8 +100,8 @@ class QuestionController extends Controller
                     'teacher_face'          =>  $answer->teacher->face,
                     'teacher_prize'         =>  $answer->teacher->teacher->prize,
                     'answer_id'             =>  $answer->id,
-                    'answer_listen'         =>  $answer->listen,
-                    'answer_like'           =>  $answer->like,
+                    'answer_listen'         =>  $answer->listen_vitual ==0 ? $answer->listen : $answer->listen_virtual,
+                    'answer_like'           =>  $answer->like_virtual == 0  ? $answer->like : $answer->like_virtual,
                     'answer_audio'          =>  $answer->audio,
                     'answer_ispayed'        =>  $isPayed,
                 );
@@ -152,8 +152,8 @@ class QuestionController extends Controller
                         'teacher_face' => $question->teacher->face,
                         'teacher_prize' => $question->teacher->teacher->prize,
                         'answer_id' => $question->answer->id,
-                        'answer_listen' => $question->answer->listen,
-                        'answer_like' => $question->answer->like,
+                        'answer_listen' => $question->answer->listen_vitual == 0 ? $question->answer->listen : $question->answer->listen_virtual,
+                        'answer_like' => $question->answer->like_virtual == 0 ? $question->answer->like : $question->answer->like_virtual,
                         'answer_audio' => $question->answer->audio,
                         'answer_time' => $question->answer->time,
                         'answer_ispayed' => $isPayed,
@@ -267,8 +267,8 @@ class QuestionController extends Controller
             foreach($arr as $key => $data) {
                 if($data->isanswered == 1) {
                     $answer = Answer::where('id', $data->answer_id)->first();
-                    $arr[$key]->listen = $answer->listen;
-                    $arr[$key]->like = $answer->like;
+                    $arr[$key]->listen = $answer->listen_vitual ==0 ? $answer->listen : $answer->listen_virtual;
+                    $arr[$key]->like = $answer->like_virtual == 0  ? $answer->like : $answer->like_virtual;
                     $arr[$key]->time = strtotime($answer->time);
 //                    var_dump($arr[$key]->time);
 //                    exit;
@@ -298,8 +298,8 @@ class QuestionController extends Controller
             foreach($arr as $key => $data) {
                 if($data->isanswered == 1) {
                     $answer = Answer::with('user')->where('id', $data->answer_id)->first();
-                    $arr[$key]->listen = $answer->listen;
-                    $arr[$key]->like = $answer->like;
+                    $arr[$key]->listen = $answer->listen_vitual ==0 ? $answer->listen : $answer->listen_virtual;
+                    $arr[$key]->like = $answer->like_virtual == 0  ? $answer->like : $answer->like_virtual;
                 }
                 $user = User::where('id' , $data->question_user_id)->first();
                 $arr[$key]->user_name = $user->wechat;
@@ -359,6 +359,7 @@ class QuestionController extends Controller
             $like = Like::where('answer_id', $id)->where('user_id', $user_id)->first();
             if(isset($answer) && !isset($like)){
                 $answer->like += 1;
+                $answer->like_virtual += ($answer->like_virtual == 0) ? 0 : 1;
                 $answer->weight += 0.4;
                 $answer->save();
                 $like = new Like();
@@ -383,6 +384,7 @@ class QuestionController extends Controller
             $like = Like::where('answer_id', $id)->where('user_id', $user_id)->first();
             if(isset($answer) && isset($like)){
                 $answer->like -= 1;
+                $answer->like -= ($answer->like_vitual == 0) ? 0 : 1;
                 $answer->weight -= 0.4;
                 $answer->save();
                 $like->delete();
@@ -394,42 +396,4 @@ class QuestionController extends Controller
             return Code::response(100);
         }
     }
-    //不喜欢这个回答的人数
-    public function dislike(){
-        $answer_id = session("id");
-        $like_answer = DB::update("update answer set `dislike`=`dislike`+1 where id=1");
-        //echo $like_answer;die;
-        if (empty($like_answer)) {
-            return Code::response(0);
-        } else{
-            return Code::response(100);
-        }
-    }
-
-    //计算问题的权重
-    public function weight(){
-        $question_id = Request::input('question_id');
-        $res1 = DB::select("select * from question left join answer on question.answer_id=answer.id where question.id=3");
-        $quanzhong = 0.6 * $res1[0]->listen + 0.4 * $res1[0]->like;
-        $res = DB::update("update question set weight=weight+$quanzhong where id=3");
-        if (!empty($res)) {
-            return Code::response(0);
-        } else {
-            return Code::response(100);
-        }
-    }
-
-    //查询当前问题的权重排序
-    public function teacher_question()
-    {
-        $res = DB::table('question')->orderBy('weight','desc')->get();
-        if (!empty($res)) {
-            return Code::response(0);
-        } else {
-            return Code::response(100);
-        }
-    }
-
-
-
 }
