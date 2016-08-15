@@ -43,8 +43,8 @@ class QuestionController extends Controller
     {
         DB::enableQueryLog();
         if (Request::has('page') && Request::has('number')) {
-            $user_id = Session::get('user_id');
-//            $user_id = 33;
+//            $user_id = Session::get('user_id');
+            $user_id = 33;
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
@@ -100,7 +100,7 @@ class QuestionController extends Controller
                     'teacher_face'          =>  $answer->teacher->face,
                     'teacher_prize'         =>  $answer->teacher->teacher->prize,
                     'answer_id'             =>  $answer->id,
-                    'answer_listen'         =>  $answer->listen_vitual ==0 ? $answer->listen : $answer->listen_virtual,
+                    'answer_listen'         =>  $answer->listen_vitual == 0 ? $answer->listen : $answer->listen_virtual,
                     'answer_like'           =>  $answer->like_virtual == 0  ? $answer->like : $answer->like_virtual,
                     'answer_audio'          =>  $answer->audio,
                     'answer_ispayed'        =>  $isPayed,
