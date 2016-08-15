@@ -17,12 +17,41 @@ class UserController extends Controller {
         return;
     }
 
+    //导师按照设定好的顺序排序
     public function getTeacher() {
         if(Request::has('page') && Request::has('number')) {
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page-1)*$number;
-            $teachers = Teacher::with('user')->skip($index)->take($number)->get();
+            //排过序的导师
+            $queryOrdered = Teacher::where('order', '>', $index)->where('order', '<=', $index + $number);
+            $countOrdered = $queryOrdered->count();
+            $teacherOrdered = $countOrdered > 0 ? $queryOrdered->with('user')->orderBy('order', 'asc')->get() : array();
+            //之前排过序的个数
+            $indexOrdered = Teacher::where('order', '<=', $index)->count();
+            $teacherUnOrdered = array();
+            $countUnordered = $number - $countOrdered;
+            if($countUnordered > 0){
+                $queryUnOrdered = Teacher::where('order', null)->with('user')->take($countUnordered)->skip($index - $indexOrdered);
+                $teacherUnOrdered = $queryUnOrdered->get();
+            }
+            $countUnordered = count($teacherUnOrdered);
+            $oi = 0; $ui = 0;
+            $i = 0;
+            $teachers = array();
+            while($oi < $countOrdered && $ui < $countUnordered){
+                if($teacherOrdered[$oi]->order - $index - 1 == $i){
+                    array_push($teachers, $teacherOrdered[$oi]);
+                    $oi++;
+                }else{
+                    array_push($teachers, $teacherUnOrdered[$ui]);
+                    $ui++;
+                }
+                $i++;
+            }
+            if($oi == $countOrdered) while($ui < $countUnordered){array_push($teachers, $teacherUnOrdered[$ui++]);};
+            if($ui == $countUnordered) while($oi < $countOrdered){array_push($teachers, $teacherOrdered[$oi++]);;};
+
             $datas = array();
             foreach($teachers as $key => $teacher) {
                 $data = array(
