@@ -100,7 +100,7 @@ class QuestionController extends Controller
                     'teacher_face'          =>  $answer->teacher->face,
                     'teacher_prize'         =>  $answer->teacher->teacher->prize,
                     'answer_id'             =>  $answer->id,
-                    'answer_listen'         =>  $answer->listen_vitual ==0 ? $answer->listen : $answer->listen_virtual,
+                    'answer_listen'         =>  $answer->listen_virtual == 0 ? $answer->listen : $answer->listen_virtual,
                     'answer_like'           =>  $answer->like_virtual == 0  ? $answer->like : $answer->like_virtual,
                     'answer_audio'          =>  $answer->audio,
                     'answer_ispayed'        =>  $isPayed,
@@ -152,7 +152,7 @@ class QuestionController extends Controller
                         'teacher_face' => $question->teacher->face,
                         'teacher_prize' => $question->teacher->teacher->prize,
                         'answer_id' => $question->answer->id,
-                        'answer_listen' => $question->answer->listen_vitual == 0 ? $question->answer->listen : $question->answer->listen_virtual,
+                        'answer_listen' => $question->answer->listen_virtual == 0 ? $question->answer->listen : $question->answer->listen_virtual,
                         'answer_like' => $question->answer->like_virtual == 0 ? $question->answer->like : $question->answer->like_virtual,
                         'answer_audio' => $question->answer->audio,
                         'answer_time' => $question->answer->time,
@@ -267,7 +267,7 @@ class QuestionController extends Controller
             foreach($arr as $key => $data) {
                 if($data->isanswered == 1) {
                     $answer = Answer::where('id', $data->answer_id)->first();
-                    $arr[$key]->listen = $answer->listen_vitual ==0 ? $answer->listen : $answer->listen_virtual;
+                    $arr[$key]->listen = $answer->listen_virtual ==0 ? $answer->listen : $answer->listen_virtual;
                     $arr[$key]->like = $answer->like_virtual == 0  ? $answer->like : $answer->like_virtual;
                     $arr[$key]->time = strtotime($answer->time);
 //                    var_dump($arr[$key]->time);
@@ -298,7 +298,7 @@ class QuestionController extends Controller
             foreach($arr as $key => $data) {
                 if($data->isanswered == 1) {
                     $answer = Answer::with('user')->where('id', $data->answer_id)->first();
-                    $arr[$key]->listen = $answer->listen_vitual ==0 ? $answer->listen : $answer->listen_virtual;
+                    $arr[$key]->listen = $answer->listen_virtual ==0 ? $answer->listen : $answer->listen_virtual;
                     $arr[$key]->like = $answer->like_virtual == 0  ? $answer->like : $answer->like_virtual;
                 }
                 $user = User::where('id' , $data->question_user_id)->first();
@@ -384,7 +384,7 @@ class QuestionController extends Controller
             $like = Like::where('answer_id', $id)->where('user_id', $user_id)->first();
             if(isset($answer) && isset($like)){
                 $answer->like -= 1;
-                $answer->like -= ($answer->like_vitual == 0) ? 0 : 1;
+                $answer->like -= ($answer->like_virtual == 0) ? 0 : 1;
                 $answer->weight -= 0.4;
                 $answer->save();
                 $like->delete();
