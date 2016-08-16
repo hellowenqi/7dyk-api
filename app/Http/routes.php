@@ -65,8 +65,14 @@ Route::group(['prefix' => 'api'], function() {
 //后台管理员
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
     Route::group(['prefix' => 'v1'], function() {
-        Route::group(['middleware' => 'adminauth'],function(){
-//        Route::group([],function(){
+        Route::get('/', function(){
+            return redirect('http://h5app.7dyk.com/ama/admin/public/index.html');
+        });
+        Route::get('/login', function(){
+            return redirect('http://h5app.7dyk.com/ama/admin/public/login.html');
+        });
+//        Route::group(['middleware' => 'adminauth'],function(){
+        Route::group([],function(){
             Route::group(['prefix' => 'question'], function() {
                 Route::get('/', 'QuestionController@getList');
                 Route::post('setQuestionOrder', 'QuestionController@setQuestionOrder');
