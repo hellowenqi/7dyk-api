@@ -15,6 +15,46 @@ use Illuminate\Support\Facades\DB;
 class UserController extends Controller
 {
 
+    public function getList(){
+        if(Request::has('number')  && Request::has('page')){
+            $number = intval(Request::get('number'));
+            $page = intval(Request::get('page'));
+            $index = $number * ($page - 1);
+            $query = new User();
+            $search = Request::get('search');
+            if($search){
+                $query = User::where('wechat', 'like', "%$search%");
+            }
+            $total = $query->count();
+            $users = $query->skip($index)->take($number)->get();
+            $datas = array();
+            $data = array();
+            foreach ($users as $user){
+                $data[] = array(
+                    'id'            => $user->id,
+                    'head'          => $user->face,
+                    'nickname'      => $user->wechat,
+                    'company'       => $user->company,
+                    'position'      => $user->position,
+                    'experience'    => $user->experience,
+                    'introduction'  => $user->introduction,
+                    'register_time' => $user->regist_time,
+                    'openid'        => $user->openid,
+                    'is_teacher'    => $user->isteacher,
+                );
+            }
+            $datas['page'] = $page;
+            $datas['number'] = $number;
+            $datas['total'] = $total;
+            $datas['datas'] = $data;
+            return Code::response(0, $datas);
+
+        }else{
+            return Code::response(100);
+        }
+
+    }
+
     public function generateInvite(){
         $users = User::where('isteacher', 0)->get();
         foreach ($users as $user){
