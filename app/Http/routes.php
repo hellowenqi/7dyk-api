@@ -71,8 +71,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
         Route::get('/login', function(){
             return redirect('http://h5app.7dyk.com/ama/admin/public/login.html');
         });
-        Route::group(['middleware' => 'adminauth'],function(){
-//        Route::group([],function(){
+//        Route::group(['middleware' => 'adminauth'],function(){
+        Route::group([],function(){
             Route::group(['prefix' => 'question'], function() {
                 Route::get('/', 'QuestionController@getList');
                 Route::post('setQuestionOrder', 'QuestionController@setQuestionOrder');
