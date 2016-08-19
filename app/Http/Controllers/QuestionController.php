@@ -386,7 +386,7 @@ class QuestionController extends Controller
             $like = Like::where('answer_id', $id)->where('user_id', $user_id)->first();
             if(isset($answer) && isset($like)){
                 $answer->like -= 1;
-                $answer->like -= ($answer->like_virtual == 0) ? 0 : 1;
+                $answer->like_virtual -= ($answer->like_virtual == 0) ? 0 : 1;
                 $answer->weight -= 0.4;
                 $answer->save();
                 $like->delete();
