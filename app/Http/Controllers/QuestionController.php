@@ -390,6 +390,8 @@ class QuestionController extends Controller
                 $answer->weight -= 0.4;
                 $answer->save();
                 $like->delete();
+                if($answer->like_virtual != 0) $answer->like = $answer->like_virtual;
+                if($answer->listen_vitual != 0) $answer->listen = $answer->listen_virtual;
                 return Code::response(0, $answer);
             } else {
                 return Code::response(100, '没有点过赞');
