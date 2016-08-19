@@ -354,7 +354,7 @@ class QuestionController extends Controller
     public function like(){
         if(Request::has('answer_id')) {
             $id = Request::get('answer_id');
-            $user_id = Session::get('user_id');
+            $user_id = 33;
             $answer = Answer::find($id);
             $like = Like::where('answer_id', $id)->where('user_id', $user_id)->first();
             if(isset($answer) && !isset($like)){
@@ -367,6 +367,8 @@ class QuestionController extends Controller
                 $like->user_id = $user_id;
                 $like->time = date("Y-m-d H:i:s", time());
                 $like->save();
+                if($answer->like_virtual != 0) $answer->like = $answer->like_virtual;
+                if($answer->listen_vitual != 0) $answer->listen = $answer->listen_virtual;
                 return Code::response(0, $answer);
             } else {
                 return Code::response(100, $like);
