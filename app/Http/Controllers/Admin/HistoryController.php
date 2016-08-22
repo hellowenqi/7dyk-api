@@ -4,6 +4,7 @@ use App\Code;
 use App\Http\Controllers\Controller;
 
 use App\Models\History;
+use App\Models\Hot;
 use Request;
 use Session;
 

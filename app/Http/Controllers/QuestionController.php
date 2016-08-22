@@ -43,10 +43,10 @@ class QuestionController extends Controller
     //排序
     public function getTopic()
     {
-        DB::enableQueryLog();
+//        DB::enableQueryLog();
         if (Request::has('page') && Request::has('number')) {
             $user_id = Session::get('user_id');
-//            $user_id = 33;
+//          $user_id = 33;
             $query = Answer::with('question');
             $search = Request::get('search');
             $page = Request::get('page');
@@ -67,8 +67,8 @@ class QuestionController extends Controller
             //本次排过序的
             $queryOrdered = $query->where('order', '>', $index)->where('order', '<=', $index + $number);
             $countOrdered = $queryOrdered->count();
-            var_dump(DB::getQueryLog());
-            exit;
+//            var_dump(DB::getQueryLog());
+//            exit;
             $answerOrdered = ($countOrdered > 0) ? $queryOrdered->with('teacher.teacher')->orderBy('order','asc')->get(): array();
             //之前有order数目：
             $indexOrdered = $query->where('order', '<=', $index)->count();

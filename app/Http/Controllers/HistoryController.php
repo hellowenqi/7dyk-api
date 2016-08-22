@@ -2,6 +2,7 @@
 
 use App\Code;
 use App\Models\History;
+use App\Models\Hot;
 use Request;
 use Session;
 
@@ -15,7 +16,7 @@ class HistoryController extends Controller {
 	public function index()
 	{
 		$user_id = Session::get('user_id');
-		$user_id = 33;
+//		$user_id = 33;
 		$page = intval(Request::get('page'));
 		$number = intval(Request::get('number'));
 		$index = $number * ($page - 1);
@@ -50,6 +51,13 @@ class HistoryController extends Controller {
 		}
 
 	}
-	
+
+
+	/**
+	 * 查询热门关键词
+	 */
+	public function hotList(){
+		return Code::response(0, Hot::all());
+	}
 
 }

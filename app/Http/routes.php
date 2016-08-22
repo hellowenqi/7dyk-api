@@ -24,8 +24,8 @@ Route::get('home', 'HomeController@index');
 Route::post('question', 'QuestionController@index');
 Route::group(['prefix' => 'api'], function() {
     Route::group(['prefix' => 'v1'], function() {
-        Route::group(['middleware' => 'wechatauth'], function() {
-//        Route::group([], function() {
+//        Route::group(['middleware' => 'wechatauth'], function() {
+        Route::group([], function() {
             Route::group(['prefix' => 'question'], function() {
                 Route::any('test', 'QuestionController@test');
                 Route::any('gettopic', 'QuestionController@getTopic');
@@ -54,9 +54,10 @@ Route::group(['prefix' => 'api'], function() {
                 Route::any('listen', 'AnswerController@listen');
             });
             Route::group(['prefix' => 'history'], function() {
-                Route::get('/', 'HistoryController@index');
-                Route::get('delete', 'HistoryController@destroy');
+                Route::get('host', 'HistoryController@index');
+                Route::post('delete', 'HistoryController@destroy');
             });
+            Route::get('hot', 'HistoryController@hotList');
         });
         Route::group(['prefix' => 'answer'], function() {
             Route::any('audio', 'AnswerController@audio');
@@ -88,6 +89,12 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
             });
             Route::group(['prefix' => 'history'], function(){
                 Route::get('/', 'HistoryController@index');
+            });
+            Route::group(['prefix' => 'hot'], function(){
+                Route::get('/', 'HotController@index');
+                Route::post('add', 'HotController@add');
+                Route::post('delete', 'HotController@destroy');
+                Route::post('update', 'HotController@update');
             });
         });
         Route::group(['prefix' => 'login'], function() {
