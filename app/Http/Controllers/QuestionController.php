@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\History;
 use App\Models\Question;
 use App\Models\Answer;
 use App\Models\Teacher;
@@ -39,26 +40,42 @@ class QuestionController extends Controller
         return Code::response(0, $signPackage);
     }
 
+    //排序
     public function getTopic()
     {
         DB::enableQueryLog();
         if (Request::has('page') && Request::has('number')) {
             $user_id = Session::get('user_id');
 //            $user_id = 33;
+            $query = Answer::with('question');
+            $search = Request::get('search');
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
+            if($search) {
+                $query->whereHas('question', function ($query) use ($search) {
+                    $query->where('content', 'like', "%$search%");
+                });
+                if ($page == 1) {
+                    $history = new History();
+                    $history->user_id = $user_id;
+                    $history->search = $search;
+                    $history->save();
+                }
+            }
             //根据order返回位置
             //本次排过序的
-            $queryOrdered = Answer::where('order', '>', $index)->where('order', '<=', $index + $number);
+            $queryOrdered = $query->where('order', '>', $index)->where('order', '<=', $index + $number);
             $countOrdered = $queryOrdered->count();
-            $answerOrdered = ($countOrdered > 0) ? $queryOrdered->with('question')->with('teacher.teacher')->orderBy('order','asc')->get(): array();
+            var_dump(DB::getQueryLog());
+            exit;
+            $answerOrdered = ($countOrdered > 0) ? $queryOrdered->with('teacher.teacher')->orderBy('order','asc')->get(): array();
             //之前有order数目：
-            $indexOrdered = Answer::where('order', '<=', $index)->count();
+            $indexOrdered = $query->where('order', '<=', $index)->count();
             $answerUnOrdered = array();
             $countUnordered = $number - $countOrdered;
             if($countUnordered > 0){
-                $queryUnOrdered = Answer::where('order', null)->with('question')->with('teacher.teacher')->orderBy('weight', 'desc')->take($countUnordered)->skip($index - $indexOrdered);
+                $queryUnOrdered = $query->where('order', null)->with('teacher.teacher')->orderBy('weight', 'desc')->take($countUnordered)->skip($index - $indexOrdered);
                 $answerUnOrdered = $queryUnOrdered->get();
             }
             $countUnordered = count($answerUnOrdered);

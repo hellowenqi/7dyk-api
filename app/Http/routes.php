@@ -53,6 +53,10 @@ Route::group(['prefix' => 'api'], function() {
                 Route::any('answer', 'AnswerController@answer');
                 Route::any('listen', 'AnswerController@listen');
             });
+            Route::group(['prefix' => 'history'], function() {
+                Route::get('/', 'HistoryController@index');
+                Route::get('delete', 'HistoryController@destroy');
+            });
         });
         Route::group(['prefix' => 'answer'], function() {
             Route::any('audio', 'AnswerController@audio');
@@ -65,12 +69,6 @@ Route::group(['prefix' => 'api'], function() {
 //后台管理员
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
     Route::group(['prefix' => 'v1'], function() {
-        Route::get('/', function(){
-            return redirect('http://h5app.7dyk.com/ama/admin/public/index.html');
-        });
-        Route::get('/login', function(){
-            return redirect('http://h5app.7dyk.com/ama/admin/public/login.html');
-        });
 //        Route::group(['middleware' => 'adminauth'],function(){
         Route::group([],function(){
             Route::group(['prefix' => 'question'], function() {
@@ -87,6 +85,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
                 Route::get('/', 'UserController@getList');
                 Route::post('generateInvite', 'UserController@generateInvite');
                 Route::post('generateAnonymousInvite', 'UserController@generateAnonymousInvite');
+            });
+            Route::group(['prefix' => 'history'], function(){
+                Route::get('/', 'HistoryController@index');
             });
         });
         Route::group(['prefix' => 'login'], function() {

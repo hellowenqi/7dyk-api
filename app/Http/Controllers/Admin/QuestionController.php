@@ -89,7 +89,7 @@ class QuestionController extends Controller {
                         ->with('user')
                         ->with('teacher');
                     if($search){
-                        $query->Where('content', 'like', "%$search%");
+                        $query->where('content', 'like', "%$search%");
 //                        $query->orWhereHas('user', function($query) use ($search) {
 //                            $query->where('wechat', 'like', "%$search%");
 //                        });
@@ -131,7 +131,7 @@ class QuestionController extends Controller {
             //未回答过的
 				$query = Question::where('isanswered', 0)->with('user');
 				if($search){
-					$query->Where('content', 'like', "%$search%");
+					$query->where('content', 'like', "%$search%");
 				}
 				$total = $query->count();
 				array_pop($orderableQuestionKeys);
