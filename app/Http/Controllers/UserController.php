@@ -154,7 +154,7 @@ class UserController extends Controller {
 
     public function getUsernow() {
         $id = Session::get('user_id');
-        $id = 33;
+//        $id = 33;
         $user = User::with('teacher')->where('id', $id)->first();
         $data = '';
         if(isset($user)) {
