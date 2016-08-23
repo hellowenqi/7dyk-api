@@ -86,6 +86,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
                 Route::get('/', 'UserController@getList');
                 Route::post('generateInvite', 'UserController@generateInvite');
                 Route::post('generateAnonymousInvite', 'UserController@generateAnonymousInvite');
+                Route::get('userInfo', 'UserController@userInfo');
             });
             Route::group(['prefix' => 'history'], function(){
                 Route::get('/', 'HistoryController@index');

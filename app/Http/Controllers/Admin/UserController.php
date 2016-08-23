@@ -5,6 +5,9 @@
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 //use App\Models\Answer;
+use App\Models\Listen;
+use App\Models\Question;
+use App\Models\QuestionExpired;
 use App\Models\User;
 use App\Code;
 use App\Models\Invite;
@@ -54,7 +57,33 @@ class UserController extends Controller
         }
 
     }
-
+    public function userInfo(){
+        $id = Request::get('id');
+        if($id){
+            $model = User::find($id);
+            if(!$model) return Code::response(102);
+            $listen_num = Listen::where('user_id', $id)->count();
+            $ask_num_answered = Question::where('question_user_id', $id)->count();
+            $ask_num_expired = QuestionExpired::where('question_user_id', $id)->count();
+            $data = array(
+                'id'                => $model->id,
+                'wechat'            => $model->wechat,
+                'company'           => $model->company,
+                'position'          => $model->position,
+                'introduction'      => $model->introduction,
+                'register_time'     => $model->regist_time,
+                'openid'            => $model->openid,
+                'isteacher'         => $model->isteacher,
+                'listen_num'        => $model->listen_num,
+                'ask_num_answered'  => $ask_num_answered,
+                'ask_num_expired'   => $ask_num_expired,
+                'listen_num'        => $listen_num
+            );
+            return Code::response(0, $data);
+        }else{
+            return Code::response(100);
+        }
+    }
     public function generateInvite(){
         $users = User::where('isteacher', 0)->get();
         foreach ($users as $user){
