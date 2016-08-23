@@ -4,3 +4,5 @@ access.log
 .idea/
 .ssh/
 vendor/
+config/wechat.php
+config/inner.php
