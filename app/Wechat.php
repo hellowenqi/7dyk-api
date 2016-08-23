@@ -142,7 +142,7 @@ class Wechat extends BaseModel {
             json_encode($data), JSON_UNESCAPED_UNICODE);
         $curl->response;
     }
-	private function getToken() {
+	public function getToken() {
 		if(Cache::has('token')) {
 		    return Cache::get('token');
 		} else {

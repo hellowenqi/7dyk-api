@@ -43,39 +43,45 @@ class QuestionController extends Controller
     //排序
     public function getTopic()
     {
-//        DB::enableQueryLog();
+//      DB::enableQueryLog();
         if (Request::has('page') && Request::has('number')) {
             $user_id = Session::get('user_id');
-//          $user_id = 33;
-            $query = Answer::with('question');
+//            $user_id = 33;
+            $query1 = Answer::with('question');
+            $query2 = Answer::with('question');
+            $query3 = Answer::with('question');
             $search = Request::get('search');
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page - 1) * $number;
+            if($search && $page == 1){
+                $history = new History();
+                $history->user_id = $user_id;
+                $history->search = $search;
+                $history->save();
+            }
             if($search) {
-                $query->whereHas('question', function ($query) use ($search) {
+                $query1->whereHas('question', function ($query) use ($search) {
                     $query->where('content', 'like', "%$search%");
                 });
-                if ($page == 1) {
-                    $history = new History();
-                    $history->user_id = $user_id;
-                    $history->search = $search;
-                    $history->save();
-                }
+                $query2->whereHas('question', function ($query) use ($search) {
+                    $query->where('content', 'like', "%$search%");
+                });
+                $query3->whereHas('question', function ($query) use ($search) {
+                    $query->where('content', 'like', "%$search%");
+                });
             }
             //根据order返回位置
             //本次排过序的
-            $queryOrdered = $query->where('order', '>', $index)->where('order', '<=', $index + $number);
+            $queryOrdered = $query1->where('order', '>', $index)->where('order', '<=', $index + $number);
             $countOrdered = $queryOrdered->count();
-//            var_dump(DB::getQueryLog());
-//            exit;
             $answerOrdered = ($countOrdered > 0) ? $queryOrdered->with('teacher.teacher')->orderBy('order','asc')->get(): array();
             //之前有order数目：
-            $indexOrdered = $query->where('order', '<=', $index)->count();
+            $indexOrdered = $query2->where('order', '<=', $index)->count();
             $answerUnOrdered = array();
             $countUnordered = $number - $countOrdered;
             if($countUnordered > 0){
-                $queryUnOrdered = $query->where('order', null)->with('teacher.teacher')->orderBy('weight', 'desc')->take($countUnordered)->skip($index - $indexOrdered);
+                $queryUnOrdered = $query3->where('order', null)->with('teacher.teacher')->orderBy('weight', 'desc')->take($countUnordered)->skip($index - $indexOrdered);
                 $answerUnOrdered = $queryUnOrdered->get();
             }
             $countUnordered = count($answerUnOrdered);
@@ -92,6 +98,8 @@ class QuestionController extends Controller
                 }
                 $i++;
             }
+            //            var_dump(DB::getQueryLog());
+//            exit;
             if($oi == $countOrdered) while($ui < $countUnordered){array_push($answers, $answerUnOrdered[$ui++]);};
             if($ui == $countUnordered) while($oi < $countOrdered){array_push($answers, $answerOrdered[$oi++]);;};
             $datas = array();

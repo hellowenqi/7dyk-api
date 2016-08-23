@@ -1,4 +1,5 @@
 <?php namespace App\Http\Controllers;
+use App\Code;
 use Crypt;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
@@ -40,6 +41,19 @@ class TimerController extends Controller {
 		$model->username = '7dykadmin';
 		$model->password = md5(md5('7dykadmin123!@#'));
 		var_dump($model->save());
+	}
+	public function getToken(){
+		$wechat = new Wechat();
+		return Code::response(0, $wechat->getToken());
+	}
+	//生成随机字符串
+	public function createNonceStr($length = 32) {
+		$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		$str = "";
+		for ($i = 0; $i < $length; $i++) {
+			$str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
+		}
+		return $str;
 	}
 
 }

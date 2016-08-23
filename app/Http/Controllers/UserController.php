@@ -11,6 +11,8 @@ use Request;
 use Redirect;
 use Cache;
 
+use Illuminate\Support\Facades\DB;
+
 class UserController extends Controller {
 
     public function __construct() {
@@ -19,20 +21,50 @@ class UserController extends Controller {
 
     //导师按照设定好的顺序排序
     public function getTeacher() {
+        DB::enableQueryLog();
         if(Request::has('page') && Request::has('number')) {
             $page = Request::get('page');
             $number = Request::get('number');
+            $search = Request::get('search');
             $index = ($page-1)*$number;
+            $query1 = Teacher::with('user');
+            $query2 = Teacher::with('user');
+            $query3 = Teacher::with('user');
+            if($search){
+                $query1->whereHas('user', function($query) use($search){
+                    $query->where(function($query) use($search) {
+                        $query->where('wechat', 'like', "%$search%")
+                            ->orWhere('company', 'like', "%$search%")
+                            ->orWhere('position', 'like', "%$search%");
+                    });
+                });
+                $query2->whereHas('user', function($query) use($search){
+                    $query->where(function($query) use($search) {
+                        $query->where('wechat', 'like', "%$search%")
+                            ->orWhere('company', 'like', "%$search%")
+                            ->orWhere('position', 'like', "%$search%");
+                    });
+                });
+                $query3->whereHas('user', function($query) use($search){
+                    $query->where(function($query) use($search) {
+                        $query->where('wechat', 'like', "%$search%")
+                            ->orWhere('company', 'like', "%$search%")
+                            ->orWhere('position', 'like', "%$search%");
+                    });
+                });
+            }
             //排过序的导师
-            $queryOrdered = Teacher::where('order', '>', $index)->where('order', '<=', $index + $number);
+            $queryOrdered = $query1->where('order', '>', $index)->where('order', '<=', $index + $number);
             $countOrdered = $queryOrdered->count();
+//            var_dump(DB::getQueryLog());
+//            exit;
             $teacherOrdered = $countOrdered > 0 ? $queryOrdered->with('user')->orderBy('order', 'asc')->get() : array();
             //之前排过序的个数
-            $indexOrdered = Teacher::where('order', '<=', $index)->count();
+            $indexOrdered = $query2->where('order', '<=', $index)->count();
             $teacherUnOrdered = array();
             $countUnordered = $number - $countOrdered;
             if($countUnordered > 0){
-                $queryUnOrdered = Teacher::where('order', null)->with('user')->take($countUnordered)->skip($index - $indexOrdered);
+                $queryUnOrdered = $query3->where('order', null)->with('user')->take($countUnordered)->skip($index - $indexOrdered);
                 $teacherUnOrdered = $queryUnOrdered->get();
             }
             $countUnordered = count($teacherUnOrdered);
@@ -154,7 +186,7 @@ class UserController extends Controller {
 
     public function getUsernow() {
         $id = Session::get('user_id');
-        $id = 33;
+//        $id = 33;
         $user = User::with('teacher')->where('id', $id)->first();
         $data = '';
         if(isset($user)) {
