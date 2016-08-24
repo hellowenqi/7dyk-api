@@ -24,8 +24,8 @@ Route::get('home', 'HomeController@index');
 Route::post('question', 'QuestionController@index');
 Route::group(['prefix' => 'api'], function() {
     Route::group(['prefix' => 'v1'], function() {
-    Route::group(['middleware' => 'wechatauth'], function() {
-//        Route::group([], function() {
+//    Route::group(['middleware' => 'wechatauth'], function() {
+        Route::group([], function() {
             Route::group(['prefix' => 'question'], function() {
                 Route::any('test', 'QuestionController@test');
                 Route::any('gettopic', 'QuestionController@getTopic');
@@ -54,7 +54,7 @@ Route::group(['prefix' => 'api'], function() {
                 Route::any('listen', 'AnswerController@listen');
             });
             Route::group(['prefix' => 'history'], function() {
-                Route::get('host', 'HistoryController@index');
+                Route::get('/', 'HistoryController@index');
                 Route::post('delete', 'HistoryController@destroy');
             });
             Route::get('hot', 'HistoryController@hotList');

@@ -39,8 +39,8 @@ class HistoryController extends Controller {
 	 */
 	public function destroy()
 	{
-		//$query = History()->where('user_id', Session::get('user_id'));
-		$query = History::where('user_id', 33);
+		$query = History()->where('user_id', Session::get('user_id'));
+//		$query = History::where('user_id', 33);
 		if(Request::has('id')){
 			$query->where('id', Request::get('id'));
 		}
