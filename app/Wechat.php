@@ -134,10 +134,22 @@ class Wechat extends BaseModel {
      * @param $redirectUrl  回调的Url
      * @param $type   消息类型
      */
-    public function sendMessage($openId, $data, $redirectUrl, $type){
+    public function sendMessage($openId, $message, $redirectUrl, $type){
         $curl = new Curl();
         $token = $this->getToken();
-
+        $data = array();
+        foreach ($message as $key=> $value){
+            $data[$key] =  array(
+                   "value" => $value,
+                   "color" => '#459ae9'
+               );
+        };
+        $data = [
+            'touser' => $openId,
+            'template_id' => Config::get('wechat.template' . $type),
+            'url' => $redirectUrl,
+            'data' => $data
+        ];
         $curl->post("https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=$token",
             json_encode($data), JSON_UNESCAPED_UNICODE);
         $curl->response;
@@ -167,6 +179,10 @@ class Wechat extends BaseModel {
         Cache::put('token', $response->access_token, 110);
         return $response->access_token;
 	}
+
+    public function sentTemplate1(){
+
+    }
 
     private function getTicket() {
         if(Cache::has('ticket')) {

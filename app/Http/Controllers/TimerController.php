@@ -1,6 +1,7 @@
 <?php namespace App\Http\Controllers;
 use App\Code;
 use Crypt;
+use Config;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Models\Question;
@@ -17,7 +18,14 @@ class TimerController extends Controller {
 	public function checkExpired(){
 		Question::where('isanswered', 0)->chunk(100, function($questions){
 			foreach ($questions as $question){
-				if(time() - strtotime($question->time) > 86400){
+				$timespan = time() - strtotime($question->time);
+				if($question->answer_user_id == 33){
+					var_dump($question);
+					echo $timespan;
+				}
+				//退款
+				if($timespan > 86400){
+					continue;
 					//超时, 移动问题
 					$model = new QuestionExpired();
 					$model->prize = $question->prize;
@@ -31,8 +39,22 @@ class TimerController extends Controller {
 					//退款
 					//发送通知给用户
 					$question_union = Question::find($question->id)->with('user')->with('teachr');
+				}elseif($timespan > 43200 && $timespan <= 43800){
+					//即将过期提醒
+					$openid = $question->teacher->openid;
+					$url = Config::get('urls.appurl') . 'account/AskedMeList';
+					$count = Question::where('answer_user_id', $question->answer_user_id)
+						->where('isanswered', 0)->count();
+					$exipireTime = date('Y-m-d H:i:s', strtotime($question->time) + 86400);
+					$message = [
+						'first' => "你还有{$count}个提问未回答，超过24小时问题将过期哦",
+						'keyword1' => '暂未回答的提问',
+						'keyword2' => $exipireTime,
+						'remark' => '快去回答吧'
+					];
+					$wechat = new Wechat();
+					$wechat->sendMessage($openid, $message, $url, 2);
 				}
-				exit;
 			}
 		});
 	}

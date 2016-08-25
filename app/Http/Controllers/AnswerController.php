@@ -117,7 +117,7 @@ class AnswerController extends Controller {
             $wechat = new Wechat();
             $audio = $wechat->getFile($media_id);
             $msg = json_decode($audio);
-            if(isset($obj->errcode)) {
+            if(isset($msg->errcode)) {
                 return Code::response(302);
             }
             $time = time();
