@@ -18,6 +18,7 @@
         return new SuccessResponse();
 });*/
 
+
 Route::get('/', 'WelcomeController@index');
 
 Route::get('home', 'HomeController@index');
@@ -54,7 +55,7 @@ Route::group(['prefix' => 'api'], function() {
                 Route::any('listen', 'AnswerController@listen');
             });
             Route::group(['prefix' => 'history'], function() {
-                Route::get('host', 'HistoryController@index');
+                Route::get('/', 'HistoryController@index');
                 Route::post('delete', 'HistoryController@destroy');
             });
             Route::get('hot', 'HistoryController@hotList');
