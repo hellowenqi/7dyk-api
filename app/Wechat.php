@@ -152,7 +152,7 @@ class Wechat extends BaseModel {
         ];
         $curl->post("https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=$token",
             json_encode($data), JSON_UNESCAPED_UNICODE);
-        $curl->response;
+        return $curl->response;
     }
 	public function getToken() {
 		if(Cache::has('token')) {

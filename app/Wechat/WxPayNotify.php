@@ -9,6 +9,7 @@ use Cache;
 use App\Models\Teacher;
 use App\Models\Answer;
 use App\Wechat;
+use App\Models\User;
 require_once "WxPayUnifiedOrder.php";
 require_once "WxPayApi.php";
 class WxPayNotify extends WxPayNotifyReply
@@ -63,10 +64,10 @@ class WxPayNotify extends WxPayNotifyReply
 				'first' => "{$name}很喜欢你，想让你解答一个问题",
 				'keyword1' => $obj->content,
 				'keyword2' => '公开',
-				'keyword2' => $obj->time,
+				'keyword3' => $obj->time,
 				'remark'   => "快去回答这个价值￥{$prize}:00的问题吧"
 
-			], Config::get('urls.appurl' . 'answer/' . $obj->id), 'template1');
+			], Config::get('urls.appurl') . 'answer/' . $obj->id, 1);
             $teacher->income += $obj->prize;
             $teacher->save();
         } else if($class_name == "App\Models\Listen") {

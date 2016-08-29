@@ -59,10 +59,16 @@ class TimerController extends Controller {
 		});
 	}
 	public function getUserInfo(){
-		$model = new Admin();
-		$model->username = '7dykadmin';
-		$model->password = md5(md5('7dykadmin123!@#'));
-		var_dump($model->save());
+		$wechat = new Wechat();
+		$return = $wechat->sendMessage('on7OgwizVILjdisVtqsEhkU3WRRE', [
+			'first' => "武文齐很喜欢你，想让你解答一个问题",
+			'keyword1' => 'hahha',
+			'keyword2' => '公开',
+			'keyword3' => '201',
+			'remark'   => "快去回答这个价值￥{123}:00的问题吧"
+
+		], Config::get('urls.appurl'). 'answer/109', 1);
+		var_dump($return);
 	}
 	public function getToken(){
 		$wechat = new Wechat();
