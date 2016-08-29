@@ -9,7 +9,9 @@ use App\Models\QuestionExpired;
 use Illuminate\Http\Request;
 use App\Wechat;
 use Curl\Curl;
+use Cache;
 use App\Models\Admin;
+use App\Models\User;
 class TimerController extends Controller {
 
 	/**
@@ -19,10 +21,10 @@ class TimerController extends Controller {
 		Question::where('isanswered', 0)->chunk(100, function($questions){
 			foreach ($questions as $question){
 				$timespan = time() - strtotime($question->time);
-				if($question->answer_user_id == 33){
-					var_dump($question);
-					echo $timespan;
-				}
+//				if($question->answer_user_id == 33){
+//					var_dump($question);
+//					echo $timespan;
+//				}
 				//退款
 				if($timespan > 86400){
 					continue;
@@ -59,15 +61,30 @@ class TimerController extends Controller {
 		});
 	}
 	public function getUserInfo(){
+		$question = new Question();
+		$question->prize = 1;
+		$question->content = '哈哈哈';
+		$question->answer_user_id = 'on7OgwizVILjdisVtqsEhkU3WRRE';
+		$question->question_user_id = '33';
+		$question->isanswered = 0;
+		$question->answer_id = 0;
+		$question->time = date("Y-m-d H:i:s", time());
+		Cache::put('12345', $question, 10);
+		$obj = Cache::get('12345');
+		var_dump($obj->save());
+		var_dump($obj->id);
+		$user = User::find($obj->question_user_id);
 		$wechat = new Wechat();
-		$return = $wechat->sendMessage('on7OgwizVILjdisVtqsEhkU3WRRE', [
-			'first' => "武文齐很喜欢你，想让你解答一个问题",
-			'keyword1' => 'hahha',
+		$name = $user->wechat;
+		$prize = $obj->prize;
+		$return = $wechat->sendMessage($user->openid, [
+			'first' => "{$name}很喜欢你，想让你解答一个问题",
+			'keyword1' => $obj->content,
 			'keyword2' => '公开',
-			'keyword3' => '201',
-			'remark'   => "快去回答这个价值￥{123}:00的问题吧"
+			'keyword3' => $obj->time,
+			'remark'   => "快去回答这个价值￥{$prize}:00的问题吧"
 
-		], Config::get('urls.appurl'). 'answer/109', 1);
+		], Config::get('urls.appurl') . 'answer/' . $obj->id, 1);
 		var_dump($return);
 	}
 	public function getToken(){

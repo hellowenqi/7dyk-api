@@ -10,6 +10,7 @@ use App\Models\Teacher;
 use App\Models\Answer;
 use App\Wechat;
 use App\Models\User;
+use Config;
 require_once "WxPayUnifiedOrder.php";
 require_once "WxPayApi.php";
 class WxPayNotify extends WxPayNotifyReply
@@ -57,6 +58,7 @@ class WxPayNotify extends WxPayNotifyReply
 			//提问问题支付
             $teacher = Teacher::where('user_id', $obj->answer_user_id)->first();
 			$user = User::find($obj->question_user_id);
+			
 			$wechat = new Wechat();
 			$name = $user->wechat;
 			$prize = $obj->prize;
