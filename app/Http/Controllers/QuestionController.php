@@ -17,6 +17,7 @@ use App\Wechat\WxPayUnifiedOrder;
 use Request;
 use Session;
 use Cache;
+use Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
@@ -40,7 +41,7 @@ class QuestionController extends Controller
         return Code::response(0, $signPackage);
     }
 
-    //排序
+    //热点问题
     public function getTopic()
     {
 //      DB::enableQueryLog();
@@ -137,7 +138,7 @@ class QuestionController extends Controller
             return Code::response(100);
         }
     }
-
+    //返回问题详情
     public function getQuestion()
     {
         if (Request::has('id')) {
@@ -242,7 +243,7 @@ class QuestionController extends Controller
             }
 
             //$prize = (int)$teacher->prize;
-            $prize = 1;
+            $prize = Config::get('app.DEV') ? 1 : (int)$teacher->prize;
             $content = Request::input('content');
             $answer_user_id = Request::input('answer_user_id');
 

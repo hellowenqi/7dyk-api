@@ -8,6 +8,7 @@
 use Cache;
 use App\Models\Teacher;
 use App\Models\Answer;
+use App\Wechat;
 require_once "WxPayUnifiedOrder.php";
 require_once "WxPayApi.php";
 class WxPayNotify extends WxPayNotifyReply
@@ -49,12 +50,27 @@ class WxPayNotify extends WxPayNotifyReply
 	{
 		//TODO 用户基础该类之后需要重写该方法，成功的时候返回true，失败返回false
         $obj = Cache::get($data['attach']);
-        $class_name = get_class($obj);
+		$obj->save();
+		$class_name = get_class($obj);
         if($class_name == "App\Models\Question") {
+			//提问问题支付
             $teacher = Teacher::where('user_id', $obj->answer_user_id)->first();
+			$user = User::find($obj->question_user_id);
+			$wechat = new Wechat();
+			$name = $user->wechat;
+			$prize = $obj->prize;
+			$wechat->sendMessage($user->openid, [
+				'first' => "{$name}很喜欢你，想让你解答一个问题",
+				'keyword1' => $obj->content,
+				'keyword2' => '公开',
+				'keyword2' => $obj->time,
+				'remark'   => "快去回答这个价值￥{$prize}:00的问题吧"
+
+			], Config::get('urls.appurl' . 'answer/' . $obj->id), 'template1');
             $teacher->income += $obj->prize;
             $teacher->save();
         } else if($class_name == "App\Models\Listen") {
+			//支付听过的
             $answer = Answer::with('teacher.teacher')->where('id', $obj->answer_id)->first();
             $answer->teacher->teacher->income += 10;
             $answer->teacher->teacher->listennum += 1;
@@ -63,7 +79,6 @@ class WxPayNotify extends WxPayNotifyReply
             $answer->listen += 1;
             $answer->save();
         }
-        $obj->save();
         Cache::forget($data['attach']);
 		return true;
 	}
