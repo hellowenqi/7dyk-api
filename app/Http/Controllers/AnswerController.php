@@ -165,8 +165,10 @@ class AnswerController extends Controller {
             //$user_id = Session::get('user_id');
             $name = Request::get('name');
             $answer_id = Request::get('answer_id');
-            $listen = Listen::with('answer')/**->where('user_id', $user_id)**/->where('answer_id', $answer_id)->first();
-            if(/**isset($listen) &&**/ $name == $listen->answer->audio) {
+            $answer = Answer::find($answer_id);
+//            $listen = Listen::with('answer')/**->where('user_id', $user_id)**/->where('answer_id', $answer_id)->first();
+//            Log::info(json_encode($listen));
+            if($name == $answer->audio) {
                 $mp3 = file_get_contents("audio/$name.mp3");
                 header("Content-type:audio/mp3");
                 echo $mp3;
