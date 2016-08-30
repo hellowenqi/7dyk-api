@@ -11,6 +11,7 @@ use App\Models\Answer;
 use App\Wechat;
 use App\Models\User;
 use Config;
+use Log;
 require_once "WxPayUnifiedOrder.php";
 require_once "WxPayApi.php";
 class WxPayNotify extends WxPayNotifyReply
@@ -52,8 +53,10 @@ class WxPayNotify extends WxPayNotifyReply
 	{
 		//TODO 用户基础该类之后需要重写该方法，成功的时候返回true，失败返回false
         $obj = Cache::get($data['attach']);
-		$obj->save();
 		$class_name = get_class($obj);
+		$result = $obj->save();
+		Log::info("result:" . $result);
+		Log::info("obj:" . json_encode($obj));
         if($class_name == "App\Models\Question") {
 			//提问问题支付
             $teacher = Teacher::where('user_id', $obj->answer_user_id)->first();
