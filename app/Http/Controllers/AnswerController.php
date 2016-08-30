@@ -145,7 +145,7 @@ class AnswerController extends Controller {
             //发送消息通知
             $user = User::find($user_id);
             $openid = $user->openid;
-            $name = $teacher->wechat;
+            $name = $teacher->user->wechat;
             $time = date('Y-m-d H:i:s');
             $wechat->sendMessage($openid,[
                 'first' => "{$name}已经解决了你的问题",
