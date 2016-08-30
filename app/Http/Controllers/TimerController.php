@@ -12,6 +12,7 @@ use Curl\Curl;
 use Cache;
 use App\Models\Admin;
 use App\Models\User;
+use Log;
 class TimerController extends Controller {
 
 	/**
@@ -71,6 +72,10 @@ class TimerController extends Controller {
 		$question->time = date("Y-m-d H:i:s", time());
 		Cache::put('12345', $question, 10);
 		$obj = Cache::get('12345');
+		Log::info('okay');
+		Log::notice('okay');
+		Log::warning('okay');
+		Log::debug('okay');
 		var_dump($obj->save());
 		var_dump($obj->id);
 		$user = User::find($obj->question_user_id);
