@@ -19,6 +19,7 @@ use FFMpeg\FFMpeg;
 use FFMpeg\Format\Audio\Mp3;
 use FFMpeg\Format\Audio\Wav;
 use Qiniu\Storage\UploadManager;
+use Config;
 
 class AnswerController extends Controller {
 
