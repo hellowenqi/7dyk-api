@@ -63,7 +63,7 @@ class WxPayNotify extends WxPayNotifyReply
 			$wechat = new Wechat();
 			$name = $user->wechat;
 			$prize = $obj->prize;
-			$wechat->sendMessage($user->openid, [
+			$wechat->sendMessage($teacher->user->openid, [
 				'first' => "{$name}很喜欢你，想让你解答一个问题",
 				'keyword1' => $obj->content,
 				'keyword2' => '公开',
