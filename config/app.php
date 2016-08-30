@@ -101,8 +101,8 @@ return [
 	|
 	*/
 
-//	'log' => 'daily',
-	'log' => 'syslog',
+	'log' => 'daily',
+//	'log' => 'syslog',
 	/*
 	|--------------------------------------------------------------------------
 	| Autoloaded Service Providers

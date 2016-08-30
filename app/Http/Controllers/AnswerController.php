@@ -1,5 +1,6 @@
 <?php namespace App\Http\Controllers;
 
+use App\Models\User;
 use Request;
 use Cache;
 use Session;
@@ -98,7 +99,7 @@ class AnswerController extends Controller {
                 $answer = new Answer();
                 $answer->prize = $question->prize;
                 $answer->time = date("Y-m-d H:i:s", time());
-                $answer->listen = 0;
+                $answer->listen = 1;
                 $answer->dislike = 0;
                 $answer->question_id = $question->id;
                 $answer->question_user_id = $question->question_user_id;
@@ -140,6 +141,18 @@ class AnswerController extends Controller {
             unlink("audio/$name.amr");
             $answer->audio = $name;
             $answer->save();
+            //发送消息通知
+            $user = User::find($user_id);
+            $openid = $user->openid;
+            $name = $teacher->wechat;
+            $time = date('Y-m-d H:i:s');
+            $wechat->sendMessage($openid,[
+                'first' => "{$name}已经解决了你的问题",
+                'keyword1' => $name,
+                'keyword2' => $time,
+                'keyword3' => '语音',
+                'remark' => '快去看看吧！',
+            ], Config::get('urls.appurl') . "question/$question_id", 3);
             return Code::response(0, array('answer' => $answer));
         } else {
             return Code::response(100);

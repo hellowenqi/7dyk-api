@@ -13,6 +13,7 @@ use Cache;
 use App\Models\Admin;
 use App\Models\User;
 use Log;
+use App\Models\Mylog;
 class TimerController extends Controller {
 
 	/**
@@ -62,6 +63,8 @@ class TimerController extends Controller {
 		});
 	}
 	public function getUserInfo(){
+		echo $_SERVER['HTTP_HOST'];
+		Mylog::debug_log('hhaha');
 		$question = new Question();
 		$question->prize = 1;
 		$question->content = '哈哈哈';

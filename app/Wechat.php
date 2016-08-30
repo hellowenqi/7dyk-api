@@ -130,7 +130,7 @@ class Wechat extends BaseModel {
 
     /**
      * @param $openId 用户的OpenId
-     * @param $data   发送的内容
+     * @param $message   发送的内容
      * @param $redirectUrl  回调的Url
      * @param $type   消息类型
      */
@@ -155,11 +155,26 @@ class Wechat extends BaseModel {
         return $curl->response;
     }
 	public function getToken() {
-		if(Cache::has('token')) {
-		    return Cache::get('token');
-		} else {
-			return $this->refreshToken();
-		}
+        if($_SERVER['HTTP_HOST'] == 'localhost'){
+            $curl = new Curl();
+            $code_url = "http://h5app.7dyk.com/ama/api/public/timer/getToken";
+            //取得token
+            $curl->get($code_url, array(
+                'token' => Config::get('inner.token')
+            ));
+            $response = json_decode($curl->response);
+            if($response->errCode == 0){
+                return $response->data;
+            }else{
+                return false;
+            }
+        }else{
+            if(Cache::has('token')) {
+                return Cache::get('token');
+            } else {
+                return $this->refreshToken();
+            }
+        }
 	}
 
 	private function refreshToken() {
