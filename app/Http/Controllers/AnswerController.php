@@ -64,7 +64,7 @@ class AnswerController extends Controller {
 
                 $input->SetTotal_fee(Config::get('app.ENV') ? 1 : 100);
                 Log::info('$prize' . $prize);
-                Log::info('config ' . Config::get('app.ENV'));
+                Log::info('config ' . json_encode(var_dump(Config::get('app.ENV'))));
                 Log::info('totoalFee:set' . (Config::get('app.ENV') ? 1 : 100));
                 Log::info('totoalFee:' . $input->GetTotal_fee());
                 $input->SetTime_start(date("YmdHis", time()));
