@@ -6,13 +6,14 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Models\Question;
 use App\Models\QuestionExpired;
+//use Illuminate\Contracts\Logging\Log;
 use Illuminate\Http\Request;
 use App\Wechat;
 use Curl\Curl;
 use Cache;
+use Log;
 use App\Models\Admin;
 use App\Models\User;
-use Log;
 use App\Models\Mylog;
 class TimerController extends Controller {
 
@@ -93,6 +94,7 @@ class TimerController extends Controller {
 			'remark'   => "快去回答这个价值￥{$prize}:00的问题吧"
 
 		], Config::get('urls.appurl') . 'answer/' . $obj->id, 1);
+        Log::info('12345'.json_encode($question));
 		var_dump($return);
 	}
 	public function getToken(){

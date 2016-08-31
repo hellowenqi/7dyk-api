@@ -143,8 +143,7 @@ class AnswerController extends Controller {
             $answer->audio = $name;
             $answer->save();
             //发送消息通知
-            $user = User::find($user_id);
-            $openid = $user->openid;
+            $openid = $question->user->openid;
             $name = $teacher->user->wechat;
             $time = date('Y-m-d H:i:s');
             $wechat->sendMessage($openid,[
