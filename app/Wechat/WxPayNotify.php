@@ -98,7 +98,7 @@ class WxPayNotify extends WxPayNotifyReply
             $answer->save();
 			//支出订单
 			$bill_in = new BillIn();
-			$bill_in->user_id = Session::get('user_id');
+			$bill_in->user_id = $obj->user_id;
 			$bill_in->prize = $obj->prize;
 			$bill_in->order = $data['attach'];
 			$bill_in->desc = "用户收听问题支付";
