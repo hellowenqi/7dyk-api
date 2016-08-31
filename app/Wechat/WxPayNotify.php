@@ -6,6 +6,7 @@
  *
  */
 use Cache;
+use Log;
 use App\Models\Teacher;
 use App\Models\Answer;
 use App\Wechat;
