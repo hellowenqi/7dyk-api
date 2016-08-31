@@ -62,12 +62,12 @@ class WxPayNotify extends WxPayNotifyReply
 			//提问问题支付
             $teacher = Teacher::where('user_id', $obj->answer_user_id)->first();
 			$user = User::find($obj->question_user_id);
-			$user->money += $obj->prize;
+			$user->money += $obj->prize / 100;
 			$user->save();
 			//支出订单
 			$bill_in = new BillIn();
 			$bill_in->user_id = $user->id;
-			$bill_in->prize = $obj->prize;
+			$bill_in->prize = $obj->prize / 100;
 			$bill_in->order = $data['attach'];
 			$bill_in->desc = "用户向导师提问支付";
 			$bill_in->time = time();
