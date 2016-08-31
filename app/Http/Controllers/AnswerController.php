@@ -27,11 +27,13 @@ class AnswerController extends Controller {
         return;
     }
 
+    //收听问题
     public function listen() {
         if(Request::has('answer_id')) {
             $user_id = Session::get('user_id');
             $answer_id = Request::get('answer_id');
             $answer = Answer::with('question')->find($answer_id);
+            //提问者返回结果
             if(isset($answer) && ($answer->answer_user_id == $user_id || $answer->question_user_id == $user_id)) {
                 $name = $answer->audio;
                 return Code::response(0, array(
@@ -40,6 +42,7 @@ class AnswerController extends Controller {
                 ));
             }
             $listen = Listen::where('user_id', $user_id)->where('answer_id', $answer_id)->first();
+            //听过的返回
             if(isset($listen)) {
                 $name = $answer->audio;
                 return Code::response(0, array(
@@ -56,7 +59,7 @@ class AnswerController extends Controller {
                 $input->SetBody("body");
                 $input->SetAttach($name);
                 $input->SetOut_trade_no(WxPayConfig::MCHID.date("YmdHis"));
-                $input->SetTotal_fee(1);
+                $input->SetTotal_fee(Config::get('app.ENV') ? 1 : 100);
                 $input->SetTime_start(date("YmdHis", time()));
                 $input->SetTime_expire(date("YmdHis", time() + 600));
                 $input->SetGoods_tag("tag");

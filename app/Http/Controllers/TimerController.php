@@ -12,7 +12,9 @@ use App\Wechat;
 use Curl\Curl;
 use Cache;
 use Log;
+use DB;
 use App\Models\Admin;
+use Illuminate\Database\Connection;
 use App\Models\User;
 use App\Models\Mylog;
 class TimerController extends Controller {
@@ -24,23 +26,32 @@ class TimerController extends Controller {
 		Question::where('isanswered', 0)->chunk(100, function($questions){
 			foreach ($questions as $question){
 				$timespan = time() - strtotime($question->time);
-//				if($question->answer_user_id == 33){
-//					var_dump($question);
-//					echo $timespan;
-//				}
+				if($question->question_user_id != 33){
+					continue;
+				}
 				//退款
 				if($timespan > 86400){
 					//超时, 移动问题
-					$model = new QuestionExpired();
-					$model->prize = $question->prize;
-					$model->content = $question->content;
-					$model->time = $question->time;
-					$model->question_user_id = $question->question_user_id;
-					$model->answer_user_id = $question->answer_user_id;
-					if($model->save()){
-						$question->delete();
-					}
-					var_dump($question);
+					DB::transaction(function() use($question){
+						$model = new QuestionExpired();
+						$model->prize = $question->prize;
+						$model->content = $question->content;
+						$model->time = $question->time;
+						$model->question_user_id = $question->question_user_id;
+						$model->answer_user_id = $question->answer_user_id;
+						$openid = $question->user->openid;
+						$name = $question->teacher->wechat;
+						$wechat = new Wechat();
+						$wechat->sendMessage($openid,[
+							'first' => "{$name}没有为你解决这个问题，快去问一下其他导师吧",
+							'reason' => '超过24小时未收到回答',
+							'refund' => "￥" . $question->prize . ":00",
+							'remark' => "查看详情"
+						], Config::get('urls.appurl') . 'tutor', 5);
+						if($model->save()){
+							$question->delete();
+						}
+					});
 					//退款
 					//发送通知给用户
 					break;

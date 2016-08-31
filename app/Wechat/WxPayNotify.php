@@ -11,7 +11,9 @@ use App\Models\Answer;
 use App\Wechat;
 use App\Models\User;
 use Config;
+use Session;
 use App\Models\Mylog;
+use App\Models\BillIn;
 require_once "WxPayUnifiedOrder.php";
 require_once "WxPayApi.php";
 class WxPayNotify extends WxPayNotifyReply
@@ -60,6 +62,17 @@ class WxPayNotify extends WxPayNotifyReply
 			//提问问题支付
             $teacher = Teacher::where('user_id', $obj->answer_user_id)->first();
 			$user = User::find($obj->question_user_id);
+			$user->money += $obj->prize;
+			$user->save();
+			//支出订单
+			$bill_in = new BillIn();
+			$bill_in->user_id = $user->user_id;
+			$bill_in->prize = $obj->prize;
+			$bill_in->order = $data['attach'];
+			$bill_in->desc = "用户向导师提问支付";
+			$bill_in->time = time();
+			$bill_in->type = 1;
+			$bill_in->save();
 			$wechat = new Wechat();
 			$name = $user->wechat;
 			$prize = $obj->prize;
@@ -71,7 +84,7 @@ class WxPayNotify extends WxPayNotifyReply
 				'remark'   => "快去回答这个价值￥{$prize}:00的问题吧"
 
 			], Config::get('urls.appurl') . 'answer/' . $obj->id, 1);
-            $teacher->income += $obj->prize;
+            $teacher->income += Config::get('app.DEV') ? '0.01' : $obj->prize;
             $teacher->save();
         } else if($class_name == "App\Models\Listen") {
 			//支付听过的
@@ -82,6 +95,18 @@ class WxPayNotify extends WxPayNotifyReply
             $answer->weight += 0.6;
             $answer->listen += 1;
             $answer->save();
+			//支出订单
+			$bill_in = new BillIn();
+			$bill_in->user_id = Session::get('user_id');
+			$bill_in->prize = $obj->prize;
+			$bill_in->order = $data['attach'];
+			$bill_in->desc = "用户收听问题支付";
+			$bill_in->time = time();
+			$bill_in->type = 2;
+			$bill_in->save();
+			//分成
+			$answer->user->money += Config::get('app.ENV') ? 0.005 : 0.5;
+			$answer->teacher->money += Config::get('app.ENV') ? 0.005 : 0.5;
         }
         Cache::forget($data['attach']);
 		return true;
