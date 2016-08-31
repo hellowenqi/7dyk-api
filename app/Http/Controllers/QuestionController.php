@@ -243,7 +243,7 @@ class QuestionController extends Controller
             }
 
             //$prize = (int)$teacher->prize;
-            $prize = Config::get('app.DEV') ? 1 : (int)$teacher->prize;
+            $prize = Config::get('app.DEV') ? 1 : (int)$teacher->prize * 100;
             $content = Request::input('content');
             $answer_user_id = Request::input('answer_user_id');
 
