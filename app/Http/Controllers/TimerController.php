@@ -30,7 +30,6 @@ class TimerController extends Controller {
 //				}
 				//退款
 				if($timespan > 86400){
-					continue;
 					//超时, 移动问题
 					$model = new QuestionExpired();
 					$model->prize = $question->prize;
@@ -41,9 +40,10 @@ class TimerController extends Controller {
 					if($model->save()){
 						$question->delete();
 					}
+					var_dump($question);
 					//退款
 					//发送通知给用户
-					$question_union = Question::find($question->id)->with('user')->with('teachr');
+					break;
 				}elseif($timespan > 43200 && $timespan <= 43800){
 					//即将过期提醒
 					$openid = $question->teacher->openid;
