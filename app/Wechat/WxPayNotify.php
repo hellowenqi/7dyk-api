@@ -99,7 +99,7 @@ class WxPayNotify extends WxPayNotifyReply
 			//支出订单
 			$bill_in = new BillIn();
 			$bill_in->user_id = $obj->user_id;
-			$bill_in->prize = Config::get('app.DEV') ? 0.005 : 0.5;
+			$bill_in->prize = Config::get('app.DEV') ? 0.01 : 1;
 			$bill_in->order = $data['attach'];
 			$bill_in->desc = "用户收听问题支付";
 			$bill_in->time = time();
@@ -108,6 +108,8 @@ class WxPayNotify extends WxPayNotifyReply
 			//分成
 			$answer->user->money += Config::get('app.DEV') ? 0.005 : 0.5;
 			$answer->teacher->money += Config::get('app.DEV') ? 0.005 : 0.5;
+			$answer->user->save();
+			$answer->teacher->save();
         }
         Cache::forget($data['attach']);
 		return true;
