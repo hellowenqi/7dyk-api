@@ -90,7 +90,7 @@ class WxPayNotify extends WxPayNotifyReply
         } else if($class_name == "App\Models\Listen") {
 			//支付听过的
             $answer = Answer::with('teacher.teacher')->where('id', $obj->answer_id)->first();
-            $answer->teacher->teacher->income += Config::get('app.ENV') ? 0.005 : 0.5;
+            $answer->teacher->teacher->income += Config::get('app.DEV') ? 0.005 : 0.5;
             $answer->teacher->teacher->listennum += 1;
             $answer->teacher->teacher->save();
             $answer->weight += 0.6;
@@ -99,15 +99,15 @@ class WxPayNotify extends WxPayNotifyReply
 			//支出订单
 			$bill_in = new BillIn();
 			$bill_in->user_id = $obj->user_id;
-			$bill_in->prize = Config::get('app.ENV') ? 0.005 : 0.5;
+			$bill_in->prize = Config::get('app.DEV') ? 0.005 : 0.5;
 			$bill_in->order = $data['attach'];
 			$bill_in->desc = "用户收听问题支付";
 			$bill_in->time = time();
 			$bill_in->type = 2;
 			$bill_in->save();
 			//分成
-			$answer->user->money += Config::get('app.ENV') ? 0.005 : 0.5;
-			$answer->teacher->money += Config::get('app.ENV') ? 0.005 : 0.5;
+			$answer->user->money += Config::get('app.DEV') ? 0.005 : 0.5;
+			$answer->teacher->money += Config::get('app.DEV') ? 0.005 : 0.5;
         }
         Cache::forget($data['attach']);
 		return true;

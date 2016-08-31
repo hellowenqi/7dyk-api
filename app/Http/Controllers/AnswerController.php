@@ -60,13 +60,7 @@ class AnswerController extends Controller {
                 $input->SetBody("body");
                 $input->SetAttach($name);
                 $input->SetOut_trade_no(WxPayConfig::MCHID.date("YmdHis"));
-                $prize = Config::get('app.ENV') ? 1 : 100;
-
-                $input->SetTotal_fee(Config::get('app.ENV') ? 1 : 100);
-                Log::info('$prize' . $prize);
-                Log::info('config ' . json_encode(var_dump(Config::get('app.ENV'))));
-                Log::info('totoalFee:set' . (Config::get('app.ENV') ? 1 : 100));
-                Log::info('totoalFee:' . $input->GetTotal_fee());
+                $input->SetTotal_fee(Config::get('app.DEV') ? 1 : 100);
                 $input->SetTime_start(date("YmdHis", time()));
                 $input->SetTime_expire(date("YmdHis", time() + 600));
                 $input->SetGoods_tag("tag");
