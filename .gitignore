@@ -6,3 +6,4 @@ access.log
 vendor/
 config/wechat.php
 config/inner.php
+app/Wechat/WxPayConfig.php
