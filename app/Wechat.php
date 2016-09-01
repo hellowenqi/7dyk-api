@@ -239,29 +239,43 @@ class Wechat extends BaseModel {
 				<spbill_create_ip>".$spbill_create_ip."</spbill_create_ip>
 				<sign>".$sign."</sign>
 				</xml>";
-        $curl = new Curl();
-        $curl->post('https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers', $data);
-        $curl->setOpt(CURLOPT_SSLCERT, WxPayConfig::SSLCERT_PATH);
-        $curl->setOpt(CURLOPT_SSLKEY, WxPayConfig::SSLKEY_PATH);
-        $curl->setOpt(CURLOPT_FOLLOWLOCATION, 1 );
-        $curl->setOpt(CURLOPT_AUTOREFERER, 1 );
-        if ($curl->error) {
-            dd($curl->error);
-            Log::info($curl->error);
-            return false;
+        $ch = curl_init ();
+        $MENU_URL="https://api.mch.weixin.qq.com/mmpaymkttransfers/gettransferinfo";
+        curl_setopt ( $ch, CURLOPT_URL, $MENU_URL );
+        curl_setopt ( $ch, CURLOPT_CUSTOMREQUEST, "POST" );
+        curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, FALSE );
+        curl_setopt ( $ch, CURLOPT_SSL_VERIFYHOST, FALSE );
+        curl_setopt($ch,CURLOPT_SSLCERTTYPE,'PEM');
+        curl_setopt($ch,CURLOPT_SSLCERT,WxPayConfig::SSLCERT_PATH);
+        curl_setopt($ch,CURLOPT_SSLKEYTYPE,'PEM');
+        curl_setopt($ch,CURLOPT_SSLKEY,WxPayConfig::SSLKEY_PATH);
+        curl_setopt ( $ch, CURLOPT_FOLLOWLOCATION, 1 );
+        curl_setopt ( $ch, CURLOPT_AUTOREFERER, 1 );
+        curl_setopt ( $ch, CURLOPT_POSTFIELDS, $data );
+        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
+        $data = curl_exec ( $ch );
+        if($data){
+            curl_close($ch);
+            return $data;
         }
         else {
-            $res = $curl->response;
-            dd($res);
-            Log::info($res);
-            $xmlObj = simplexml_load_string($res);
-            if(trim($xmlObj->return_code) == "SUCCESS" && trim($xmlObj->result_code) == 'SUCCESS'){
-                return true;
-            }else{
-                return false;
-            }
-            return true;
+            $error = curl_errno($ch);
+            echo "call faild, errorCode:$error\n";
+            curl_close($ch);
+            return false;
         }
+//        else {
+//            $res = $curl->response;
+//            dd($res);
+//            Log::info($res);
+//            $xmlObj = simplexml_load_string($res);
+//            if(trim($xmlObj->return_code) == "SUCCESS" && trim($xmlObj->result_code) == 'SUCCESS'){
+//                return true;
+//            }else{
+//                return false;
+//            }
+//            return true;
+//        }
 
     }
     //生成签名
