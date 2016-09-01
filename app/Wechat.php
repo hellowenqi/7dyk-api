@@ -2,10 +2,12 @@
 
 use Cache;
 use Config;
+use Log;
 use Session;
 use Redirect;
 use Curl\Curl;
 use App\Models\BaseModel;
+use App\Wechat\WxPayConfig;
 
 class Wechat extends BaseModel {
     private $appId;
@@ -194,11 +196,119 @@ class Wechat extends BaseModel {
         Cache::put('token', $response->access_token, 110);
         return $response->access_token;
 	}
+    /**
+     *参数说明，openID，用户在该公众号唯一标识，nickname:用户名，money提现金额，单位元，大于1, desc,描述信息
+     *return true提现成功，false提现失败
+     */
+    public function get_cash($openID, $nickname, $money, $desc, $partner_trade_no){
+        $mch_appid = WxPayConfig::APPID;
+        $mchid = WxPayConfig::MCHID;
+        $nonce_str = $this->createNonceStr(32);
+        $openid = $openID;
+        $check_name='NO_CHECK';
+        $re_user_name=$nickname;
+        $amount = intval($money * 100);
+        $desc = $desc;
+        $spbill_create_ip=$_SERVER["REMOTE_ADDR"];//请求ip
+//        $spbill_create_ip='10.205.41.194';//请求ip
+        //封装成数据
+        $dataArr=array();
+        $dataArr['amount']=$amount;
+        $dataArr['check_name']=$check_name;
+        $dataArr['desc']=$desc;
+        $dataArr['mch_appid']=$mch_appid;
+        $dataArr['mchid']=$mchid;
+        $dataArr['nonce_str']=$nonce_str;
+        $dataArr['openid']=$openid;
+        $dataArr['partner_trade_no']=$partner_trade_no;
+        $dataArr['re_user_name']=$re_user_name;
+        $dataArr['spbill_create_ip']=$spbill_create_ip;
+        //获取签名
+        $sign=$this->getSign($dataArr, WxPayConfig::KEY);
 
-    public function sentTemplate1(){
+        $data="<xml>
+				<mch_appid>".$mch_appid."</mch_appid>
+				<mchid>".$mchid."</mchid>
+				<nonce_str>".$nonce_str."</nonce_str>
+				<partner_trade_no>".$partner_trade_no."</partner_trade_no>
+				<openid>".$openid."</openid>
+				<check_name>".$check_name."</check_name>
+				<re_user_name>".$re_user_name."</re_user_name>
+				<amount>".$amount."</amount>
+				<desc>".$desc."</desc>
+				<spbill_create_ip>".$spbill_create_ip."</spbill_create_ip>
+				<sign>".$sign."</sign>
+				</xml>";
+        $curl = new Curl();
+        $curl->post('https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers', $data);
+        $curl->setOpt(CURLOPT_SSLCERT, WxPayConfig::SSLCERT_PATH);
+        $curl->setOpt(CURLOPT_SSLKEY, WxPayConfig::SSLKEY_PATH);
+        $curl->setOpt(CURLOPT_FOLLOWLOCATION, 1 );
+        $curl->setOpt(CURLOPT_AUTOREFERER, 1 );
+        if ($curl->error) {
+            dd($curl->error);
+            Log::info($curl->error);
+            return false;
+        }
+        else {
+            $res = $curl->response;
+            dd($res);
+            Log::info($res);
+            $xmlObj = simplexml_load_string($res);
+            if(trim($xmlObj->return_code) == "SUCCESS" && trim($xmlObj->result_code) == 'SUCCESS'){
+                return true;
+            }else{
+                return false;
+            }
+            return true;
+        }
 
     }
-
+    //生成签名
+    private function getSign($Obj, $key){
+        foreach ($Obj as $k => $v)
+        {
+            $Parameters[$k] = $v;
+        }
+        //签名步骤一：按字典序排序参数
+        ksort($Parameters);
+        $String = $this->formatBizQueryParaMap($Parameters, false);
+        //echo '【string1】'.$String.'</br>';
+        //签名步骤二：在string后加入KEY
+        $String = $String."&key=".$key;
+        //echo "【string2】".$String."</br>";
+        //签名步骤三：MD5加密
+        $String = md5($String);
+        //echo "【string3】 ".$String."</br>";
+        //签名步骤四：所有字符转为大写
+        $result_ = strtoupper($String);
+        //echo "【result】 ".$result_."</br>";
+        return $result_;
+    }
+     /**
+     * 	作用：格式化参数，签名过程需要使用
+     */
+    private function formatBizQueryParaMap($paraMap, $urlencode)
+    {
+        $buff = "";
+        ksort($paraMap);
+        foreach ($paraMap as $k => $v)
+        {
+            if($urlencode)
+            {
+                $v = urlencode($v);
+            }
+            //$buff .= strtolower($k) . "=" . $v . "&";
+            $buff .= $k . "=" . $v . "&";
+        }
+        $reqPar = '';
+        if (strlen($buff) > 0)
+        {
+            $reqPar = substr($buff, 0, strlen($buff)-1);
+        }
+        Log::info("处理前: " . $buff  . ' 处理后： '. $reqPar);
+        return $reqPar;
+    }
     private function getTicket() {
         if(Cache::has('ticket')) {
             return Cache::get('ticket');
@@ -219,7 +329,6 @@ class Wechat extends BaseModel {
         Cache::put('ticket', $response->ticket, 110);
         return $response->ticket;
     }
-
     //生成随机字符串
     private function createNonceStr($length = 16) {
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

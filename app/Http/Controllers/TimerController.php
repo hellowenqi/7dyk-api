@@ -75,38 +75,10 @@ class TimerController extends Controller {
 		});
 	}
 	public function getUserInfo(){
-		echo $_SERVER['HTTP_HOST'];
-		Mylog::debug_log('hhaha');
-		$question = new Question();
-		$question->prize = 1;
-		$question->content = '哈哈哈';
-		$question->answer_user_id = 'on7OgwizVILjdisVtqsEhkU3WRRE';
-		$question->question_user_id = '33';
-		$question->isanswered = 0;
-		$question->answer_id = 0;
-		$question->time = date("Y-m-d H:i:s", time());
-		Cache::put('12345', $question, 10);
-		$obj = Cache::get('12345');
-		Log::info('okay');
-		Log::notice('okay');
-		Log::warning('okay');
-		Log::debug('okay');
-		var_dump($obj->save());
-		var_dump($obj->id);
-		$user = User::find($obj->question_user_id);
 		$wechat = new Wechat();
-		$name = $user->wechat;
-		$prize = $obj->prize;
-		$return = $wechat->sendMessage($user->openid, [
-			'first' => "{$name}很喜欢你，想让你解答一个问题",
-			'keyword1' => $obj->content,
-			'keyword2' => '公开',
-			'keyword3' => $obj->time,
-			'remark'   => "快去回答这个价值￥{$prize}:00的问题吧"
-
-		], Config::get('urls.appurl') . 'answer/' . $obj->id, 1);
-        Log::info('12345'.json_encode($question));
-		var_dump($return);
+		$time = time();
+		$name = md5("33$time");
+		$wechat->get_cash('on7OgwizVILjdisVtqsEhkU3WRRE', '城管', 1, '测试', $name);
 	}
 	public function getToken(){
 		$wechat = new Wechat();
