@@ -121,12 +121,13 @@ class TimerController extends Controller {
                     if($user->isteacher == 1){
                         Question::where("isanswered", 0)->where('answer_user_id', $user->id)->sum('prize');
                     }
-                    $wechat->sendMessage($user->openid,[
+                    $result = $wechat->sendMessage($user->openid,[
                         'first' => "恭喜你得到“7点问答”的收益￥$money",
                         'keyword1' => date("Y-m-d H:i:s", time),
                         'keyword2' => "￥" . $money,
                         'remark'   => "截止目前，你的“7点问答”总收益￥{$name}, 待领取￥$moneyLeft"
                     ], Config::get('urls.appurl') . 'account', 4);
+                    var_dump($result);
                 }
             }
         });
