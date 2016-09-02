@@ -24,13 +24,13 @@ class TimerController extends Controller {
 	 * 将过期的问题移动到新表中 检查过期的题目，退款给用户，发送退款通知给老师、学生
 	 */
 	public function checkExpired(){
-		Question::where('isanswered', 0)->chunk(100, function($questions){
+		$time = time();
+		Question::where('isanswered', 0)->chunk(20, function($questions) use($time){
 			foreach ($questions as $question){
-				$timespan = time() - strtotime($question->time);
 				if($question->question_user_id != 33){
 					continue;
 				}
-				//退款
+				$timespan = $time - strtotime($question->time);
 				if($timespan > 86400){
 					//超时, 移动问题
 					DB::transaction(function() use($question){
@@ -42,6 +42,10 @@ class TimerController extends Controller {
 						$model->answer_user_id = $question->answer_user_id;
 						$openid = $question->user->openid;
 						$name = $question->teacher->wechat;
+						//退款
+						$question->user->money += $question->prize;
+						$question->user->save();
+						//发送通知给用户
 						$wechat = new Wechat();
 						$wechat->sendMessage($openid,[
 							'first' => "{$name}没有为你解决这个问题，快去问一下其他导师吧",
@@ -53,8 +57,6 @@ class TimerController extends Controller {
 							$question->delete();
 						}
 					});
-					//退款
-					//发送通知给用户
 					break;
 				}elseif($timespan > 43200 && $timespan <= 43800){
 					//即将过期提醒
