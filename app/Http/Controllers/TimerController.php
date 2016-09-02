@@ -90,7 +90,7 @@ class TimerController extends Controller {
                     Mylog::pay_log($xmlObj->asXML());
                     DB::transaction(function() use ($user, $xmlObj){
                         $model = new BillOut();
-                        $model->user_id = $user->user_id;
+                        $model->user_id = $user->id;
                         $model->name = $user->wechat;
                         $model->openid = $user->openid;
                         $model->prize = $user->money;
