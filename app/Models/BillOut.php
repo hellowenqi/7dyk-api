@@ -7,7 +7,6 @@ class BillOut extends BaseModel {
     protected $table = 'bill_out';
     public function __construct() {
         parent::__construct();
-        $this->timestamps = true;
     }
 
     /**
