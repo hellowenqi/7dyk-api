@@ -27,9 +27,6 @@ class TimerController extends Controller {
 		$time = time();
 		Question::where('isanswered', 0)->chunk(20, function($questions) use($time){
 			foreach ($questions as $question){
-				if($question->question_user_id != 33){
-					continue;
-				}
 				$timespan = $time - strtotime($question->time);
 				if($timespan > 86400){
 					//超时, 移动问题
@@ -43,7 +40,7 @@ class TimerController extends Controller {
 						$openid = $question->user->openid;
 						$name = $question->teacher->wechat;
 						//退款
-						$question->user->money += $question->prize;
+						$question->user->money += Config::get('app.DEV') ? 0.01 : $question->prize;
 						$question->user->save();
 						//发送通知给用户
 						$wechat = new Wechat();
@@ -57,7 +54,7 @@ class TimerController extends Controller {
 							$question->delete();
 						}
 					});
-					break;
+//					break;
 				}elseif($timespan > 43200 && $timespan <= 43800){
 					//即将过期提醒
 					$openid = $question->teacher->openid;
