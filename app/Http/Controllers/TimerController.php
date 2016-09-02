@@ -106,7 +106,7 @@ class TimerController extends Controller {
                     $moneyLeft = 0;
                     $moneyAll = $user->money_all;
                     if($user->isteacher == 1){
-                        Question::where("isanswered", 0)->where('answer_user_id', $user->id)->sum('prize');
+                        $moneyLeft = Question::where("isanswered", 0)->where('answer_user_id', $user->id)->sum('prize');
                     }
                     $wechat->sendMessage($user->openid,[
                         'first' => "恭喜你得到“7点问答”的收益￥$money",
