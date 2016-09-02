@@ -87,7 +87,7 @@ class TimerController extends Controller {
                 $xmlObj = simplexml_load_string($res);
                 if(trim($xmlObj->return_code) == "SUCCESS" && trim($xmlObj->result_code) == 'SUCCESS'){
                     //退款成功
-                    Mylog::pay_log(json_encode(dd($res)));
+                    Mylog::pay_log($xmlObj->asXML());
                     DB::transaction(function() use ($user, $xmlObj){
                         $model = new BillOut();
                         $model->user_id = $user->user_id;
@@ -108,7 +108,7 @@ class TimerController extends Controller {
                     if($user->isteacher == 1){
                         Question::where("isanswered", 0)->where('answer_user_id', $user->id)->sum('prize');
                     }
-                    $result = $wechat->sendMessage($user->openid,[
+                    $wechat->sendMessage($user->openid,[
                         'first' => "恭喜你得到“7点问答”的收益￥$money",
                         'keyword1' => date("Y-m-d H:i:s", time()),
                         'keyword2' => "￥" . $money,
@@ -116,10 +116,7 @@ class TimerController extends Controller {
                     ], Config::get('urls.appurl') . 'account', 4);
                 }else{
                     //退款失败
-                    Mylog::pay_error_log(json_encode(dd($res)));
-                    //发送通知消息
-
-                    var_dump($result);
+                    Mylog::pay_error_log($xmlObj->asXML());
                 }
             }
         });
