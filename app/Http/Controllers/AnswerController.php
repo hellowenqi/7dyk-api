@@ -105,7 +105,7 @@ class AnswerController extends Controller {
                 $answer->prize = $question->prize;
                 $answer->time = date("Y-m-d H:i:s", time());
                 $answer->listen = 1;
-                $answer->dislike = 0;
+                $answer->like = 0;
                 $answer->question_id = $question->id;
                 $answer->question_user_id = $question->question_user_id;
                 $answer->answer_user_id = $user_id;
@@ -115,7 +115,9 @@ class AnswerController extends Controller {
                 $question->answer_user_id = $user_id;
                 $question->save();
                 $teacher->answernum++;
-                $teacher->income+=$question->prize;
+                $teacher->income+=Config::get('app.DEV') ? 0.01 : $question->prize;
+                $teacher->user->money+=Config::get('app.DEV') ? 0.01 : $question->prize;
+                $teacher->user->save();
                 $teacher->save();
             }
             //判断问题是否存在且未被回答，并创建答案

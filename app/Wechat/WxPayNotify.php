@@ -83,10 +83,7 @@ class WxPayNotify extends WxPayNotifyReply
 				'remark'   => "快去回答这个价值￥{$prize}:00的问题吧"
 
 			], Config::get('urls.appurl') . 'answer/' . $obj->id, 1);
-            $teacher->income += $obj->prize / 100;
-			$teacher->user->money += $obj->prize / 100;
 			$teacher->user->save();
-            $teacher->save();
         } else if($class_name == "App\Models\Listen") {
 			//支付听过的
             $answer = Answer::with('teacher.teacher')->where('id', $obj->answer_id)->first();
