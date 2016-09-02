@@ -10,7 +10,7 @@ class Mylog{
     private static $obj_log = [];
 
     //日志类型映射
-    private static $classify_arr = ['default', 'order_log','error_log'];
+    private static $classify_arr = ['default', 'order_log','pay_log', 'pay_error_log'];
 
     /**
     * 单利初始化以及调取对象
@@ -23,7 +23,8 @@ class Mylog{
     {
         if(empty(self::$obj_log[$classify])) {
         self::$obj_log[$classify] = new Writer(new Logger($classify));
-        self::$obj_log[$classify]->useDailyFiles(self::get_path($classify), $max_num);
+//        self::$obj_log[$classify]->useDailyFiles(self::get_path($classify), $max_num);
+        self::$obj_log[$classify]->useFiles(self::get_path($classify), 'info');
         }
         return self::$obj_log[$classify];
     }

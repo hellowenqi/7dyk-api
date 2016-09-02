@@ -256,7 +256,6 @@ class Wechat extends BaseModel {
         $data = curl_exec ( $ch );
         if($data){
             curl_close($ch);
-            dd($data);
             return $data;
         }
         else {
@@ -265,19 +264,6 @@ class Wechat extends BaseModel {
             curl_close($ch);
             return false;
         }
-//        else {
-//            $res = $curl->response;
-//            dd($res);
-//            Log::info($res);
-//            $xmlObj = simplexml_load_string($res);
-//            if(trim($xmlObj->return_code) == "SUCCESS" && trim($xmlObj->result_code) == 'SUCCESS'){
-//                return true;
-//            }else{
-//                return false;
-//            }
-//            return true;
-//        }
-
     }
     //生成签名
     private function getSign($Obj, $key){

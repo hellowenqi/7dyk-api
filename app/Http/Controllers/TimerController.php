@@ -1,5 +1,6 @@
 <?php namespace App\Http\Controllers;
 use App\Code;
+use App\Models\BillOut;
 use Crypt;
 use Config;
 use App\Http\Requests;
@@ -12,11 +13,11 @@ use App\Wechat;
 use Curl\Curl;
 use Cache;
 use Log;
+use App\Models\Mylog;
 use DB;
 use App\Models\Admin;
 use Illuminate\Database\Connection;
 use App\Models\User;
-use App\Models\Mylog;
 class TimerController extends Controller {
 
 	/**
@@ -75,10 +76,35 @@ class TimerController extends Controller {
 		});
 	}
 	public function getUserInfo(){
-		$wechat = new Wechat();
-		$time = time();
-		$name = md5("33$time");
-		$wechat->get_cash('on7OgwizVILjdisVtqsEhkU3WRRE', '城管', 1, '测试', $name);
+	    User::where('money', '>=', 1)->chunk(50,function($user){
+            $wechat = new Wechat();
+            $time = time();
+            $name = $user->user_id;
+            $name = md5("{$name}{$time}");
+            $res = $wechat->get_cash('on7OgwizVILjdisVtqsEhkU3WRRE', '城管', 1, '测试', $name);
+            $xmlObj = simplexml_load_string($res);
+            if(trim($xmlObj->return_code) == "SUCCESS" && trim($xmlObj->result_code) == 'SUCCESS'){
+                //退款成功
+                Mylog::pay_log(json_encode(dd(res)));
+                DB::transaction(function() use ($user, $xmlObj){
+                    $model = new BillOut();
+                    $model->user_id = $user->user_id;
+                    $model->name = $user->wechat;
+                    $model->openid = $user->openid;
+                    $model->prize = $user->money;
+                    $model->desc = "每天结算";
+                    $model->time = time();
+                    $model->order = $xmlObj->partner_trade_no;
+                    $user->money = 0;
+                    $user->save();
+                    $model->save();
+                });
+            }else{
+                //退款失败
+                Mylog::pay_error_log($res);
+                Mylog::pay_error_log(json_encode(dd($res)));
+            }
+        });
 	}
 	public function getToken(){
 		$wechat = new Wechat();
