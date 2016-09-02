@@ -240,7 +240,7 @@ class Wechat extends BaseModel {
 				<sign>".$sign."</sign>
 				</xml>";
         $ch = curl_init ();
-        $MENU_URL="https://api.mch.weixin.qq.com/mmpaymkttransfers/gettransferinfo";
+        $MENU_URL="https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers";
         curl_setopt ( $ch, CURLOPT_URL, $MENU_URL );
         curl_setopt ( $ch, CURLOPT_CUSTOMREQUEST, "POST" );
         curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, FALSE );
