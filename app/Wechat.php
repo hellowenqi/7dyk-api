@@ -256,6 +256,7 @@ class Wechat extends BaseModel {
         $data = curl_exec ( $ch );
         if($data){
             curl_close($ch);
+            dd($data);
             return $data;
         }
         else {
