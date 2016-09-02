@@ -87,7 +87,7 @@ class TimerController extends Controller {
                 $xmlObj = simplexml_load_string($res);
                 if(trim($xmlObj->return_code) == "SUCCESS" && trim($xmlObj->result_code) == 'SUCCESS'){
                     //退款成功
-                    Mylog::pay_log(json_encode(dd(res)));
+                    Mylog::pay_log(json_encode(dd($res)));
                     DB::transaction(function() use ($user, $xmlObj){
                         $model = new BillOut();
                         $model->user_id = $user->user_id;
@@ -112,10 +112,9 @@ class TimerController extends Controller {
                         'keyword1' => date("Y-m-d H:i:s", time),
                         'keyword2' => "￥" . $money,
                         'remark'   => "截止目前，你的“7点问答”总收益￥{$name}, 待领取￥$moneyLeft"
-                    ]);
+                    ], Config::get('urls.appurl') . 'account', 4);
                 }else{
                     //退款失败
-                    Mylog::pay_error_log($res);
                     Mylog::pay_error_log(json_encode(dd($res)));
                     //发送通知消息
                     $moneyLeft = 0;
@@ -127,7 +126,7 @@ class TimerController extends Controller {
                         'keyword1' => date("Y-m-d H:i:s", time),
                         'keyword2' => "￥" . $money,
                         'remark'   => "截止目前，你的“7点问答”总收益￥{$name}, 待领取￥$moneyLeft"
-                    ]);
+                    ], Config::get('urls.appurl') . 'account', 4);
                 }
             }
         });
