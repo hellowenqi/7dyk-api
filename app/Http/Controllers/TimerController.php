@@ -76,57 +76,59 @@ class TimerController extends Controller {
 		});
 	}
 	public function getUserInfo(){
-	    User::where('money', '>=', 1)->chunk(50,function($user){
-	        $money = round($user->money, 2);
-            $wechat = new Wechat();
-            $time = time();
-            $id = $user->id;
-            $name = md5("{$id}{$time}");
-            $res = $wechat->get_cash($user->openid, $user->wechat, $money, '结算付款', $name);
-            $xmlObj = simplexml_load_string($res);
-            if(trim($xmlObj->return_code) == "SUCCESS" && trim($xmlObj->result_code) == 'SUCCESS'){
-                //退款成功
-                Mylog::pay_log(json_encode(dd(res)));
-                DB::transaction(function() use ($user, $xmlObj){
-                    $model = new BillOut();
-                    $model->user_id = $user->user_id;
-                    $model->name = $user->wechat;
-                    $model->openid = $user->openid;
-                    $model->prize = $user->money;
-                    $model->desc = "每天结算";
-                    $model->time = time();
-                    $model->order = $xmlObj->partner_trade_no;
-                    $user->money_all += round($user->money,2);
-                    $user->money = 0;
-                    $user->save();
-                    $model->save();
-                });
-                //发送通知消息
-                $moneyLeft = 0;
-                if($user->isteacher == 1){
-                    Question::where("isanswered", 0)->where('answer_user_id', $user->id)->sum('prize');
+	    User::where('money', '>=', 1)->chunk(50,function($users){
+	        foreach ($users as $user){
+                $money = round($user->money, 2);
+                $wechat = new Wechat();
+                $time = time();
+                $id = $user->id;
+                $name = md5("{$id}{$time}");
+                $res = $wechat->get_cash($user->openid, $user->wechat, $money, '结算付款', $name);
+                $xmlObj = simplexml_load_string($res);
+                if(trim($xmlObj->return_code) == "SUCCESS" && trim($xmlObj->result_code) == 'SUCCESS'){
+                    //退款成功
+                    Mylog::pay_log(json_encode(dd(res)));
+                    DB::transaction(function() use ($user, $xmlObj){
+                        $model = new BillOut();
+                        $model->user_id = $user->user_id;
+                        $model->name = $user->wechat;
+                        $model->openid = $user->openid;
+                        $model->prize = $user->money;
+                        $model->desc = "每天结算";
+                        $model->time = time();
+                        $model->order = $xmlObj->partner_trade_no;
+                        $user->money_all += round($user->money,2);
+                        $user->money = 0;
+                        $user->save();
+                        $model->save();
+                    });
+                    //发送通知消息
+                    $moneyLeft = 0;
+                    if($user->isteacher == 1){
+                        Question::where("isanswered", 0)->where('answer_user_id', $user->id)->sum('prize');
+                    }
+                    $wechat->sendMessage($user->openid,[
+                        'first' => "恭喜你得到“7点问答”的收益￥$money",
+                        'keyword1' => date("Y-m-d H:i:s", time),
+                        'keyword2' => "￥" . $money,
+                        'remark'   => "截止目前，你的“7点问答”总收益￥{$name}, 待领取￥$moneyLeft"
+                    ]);
+                }else{
+                    //退款失败
+                    Mylog::pay_error_log($res);
+                    Mylog::pay_error_log(json_encode(dd($res)));
+                    //发送通知消息
+                    $moneyLeft = 0;
+                    if($user->isteacher == 1){
+                        Question::where("isanswered", 0)->where('answer_user_id', $user->id)->sum('prize');
+                    }
+                    $wechat->sendMessage($user->openid,[
+                        'first' => "恭喜你得到“7点问答”的收益￥$money",
+                        'keyword1' => date("Y-m-d H:i:s", time),
+                        'keyword2' => "￥" . $money,
+                        'remark'   => "截止目前，你的“7点问答”总收益￥{$name}, 待领取￥$moneyLeft"
+                    ]);
                 }
-                $wechat->sendMessage($user->openid,[
-                    'first' => "恭喜你得到“7点问答”的收益￥$money",
-                    'keyword1' => date("Y-m-d H:i:s", time),
-                    'keyword2' => "￥" . $money,
-                    'remark'   => "截止目前，你的“7点问答”总收益￥{$name}, 待领取￥$moneyLeft"
-                ]);
-            }else{
-                //退款失败
-                Mylog::pay_error_log($res);
-                Mylog::pay_error_log(json_encode(dd($res)));
-                //发送通知消息
-                $moneyLeft = 0;
-                if($user->isteacher == 1){
-                    Question::where("isanswered", 0)->where('answer_user_id', $user->id)->sum('prize');
-                }
-                $wechat->sendMessage($user->openid,[
-                    'first' => "恭喜你得到“7点问答”的收益￥$money",
-                    'keyword1' => date("Y-m-d H:i:s", time),
-                    'keyword2' => "￥" . $money,
-                    'remark'   => "截止目前，你的“7点问答”总收益￥{$name}, 待领取￥$moneyLeft"
-                ]);
             }
         });
 	}
