@@ -232,6 +232,7 @@ class UserController extends Controller {
                 Code::response(103);
             }
             $self_id = Session::get('user_id');
+//            $self_id = 33;
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page-1)*$number;
@@ -241,7 +242,7 @@ class UserController extends Controller {
                 if($question->user_id == $self_id || $question->answer_user_id == $self_id) $data['is_payed'] = 1;
                 else {
                     $listen = Listen::where('answer_id', $question->answer_id)->where('user_id', $self_id)->first();
-                    if($listen) $data['is_payed'] = 0;
+                    if($listen) $data['is_payed'] = 1;
                     else $data['is_payed'] = 0;
                 }
                 $data['id'] = $question->id;
