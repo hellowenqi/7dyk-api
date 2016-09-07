@@ -231,16 +231,19 @@ class UserController extends Controller {
             } else if($user->isteacher != 1) {
                 Code::response(103);
             }
-            $user_id = Session::get('user_id');
+            $self_id = Session::get('user_id');
             $page = Request::get('page');
             $number = Request::get('number');
             $index = ($page-1)*$number;
             $questions = Question::with('answer')->where('answer_user_id', $user_id)->where('isanswered', 1)->skip($index)->take($number)->get();
             $datas = array();
             foreach($questions as $key => $question) {
-                $listen = Listen::where('answer_id', $question->answer_id)->where('user_id', $user_id)->first();
-                if($listen) $data['is_payed'] = 1;
-                else $data['is_payed'] = 0;
+                if($question->user_id == $self_id || $question->answer_user_id == $self_id) $data['is_payed'] = 1;
+                else {
+                    $listen = Listen::where('answer_id', $question->answer_id)->where('user_id', $self_id)->first();
+                    if($listen) $data['is_payed'] = 0;
+                    else $data['is_payed'] = 0;
+                }
                 $data['id'] = $question->id;
                 $data['prize'] = $question->prize;
                 $data['content'] = $question->content;
