@@ -292,7 +292,7 @@ class UserController extends Controller {
         if(Request::has('redirect_url')) {
             $redirect = Request::get('redirect_url');
         } else {
-            $redirect = "http://www.baidu.com";
+            $redirect = "http://h5app.7dyk.com/ama/7dyk/";
         }
         Session::put('redirect', $redirect);
         return $wechat->loginWechat("http://h5app.7dyk.com/ama/api/public/api/v1/code");
