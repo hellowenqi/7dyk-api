@@ -289,8 +289,8 @@ class UserController extends Controller {
 
     public function auth() {
         $wechat = new Wechat;
-        if(Request::has('redirect')) {
-            $redirect = Request::get('redirect');
+        if(Request::has('redirect_url')) {
+            $redirect = Request::get('redirect_url');
         } else {
             $redirect = "http://www.baidu.com";
         }
@@ -300,8 +300,8 @@ class UserController extends Controller {
 
     public function code() {
         $wechat = new Wechat;
-        //$redirect = Session::get('redirect');
-        $redirect = "http://h5app.7dyk.com/ama/7dyk/";
+        $redirect = Session::get('redirect');
+//        $redirect = "http://h5app.7dyk.com/ama/7dyk/";
         if(Request::has('code')) {
             $code = Request::get('code');
             $openid = $wechat->getOpenid($code);
