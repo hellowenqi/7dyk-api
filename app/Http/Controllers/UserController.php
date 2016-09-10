@@ -239,7 +239,7 @@ class UserController extends Controller {
             $questions = Question::with('answer')->where('answer_user_id', $user_id)->where('isanswered', 1)->skip($index)->take($number)->get();
             $datas = array();
             foreach($questions as $key => $question) {
-                if($question->user_id == $self_id || $question->answer_user_id == $self_id) $data['is_payed'] = 1;
+                if($question->question_user_id == $self_id || $question->answer_user_id == $self_id) $data['is_payed'] = 1;
                 else {
                     $listen = Listen::where('answer_id', $question->answer_id)->where('user_id', $self_id)->first();
                     if($listen) $data['is_payed'] = 1;
