@@ -251,8 +251,8 @@ class UserController extends Controller {
                 $data['time'] = strtotime($question->answer->time);
                 $data['isanswered'] = $question->isanswered;
                 $data['answer_id'] = $question->answer_id;
-                $data['listen'] = $question->answer->listen;
-                $data['dislike'] = $question->answer->dislike;
+                $data['listen'] = ($question->answer->listen_virtual == 0) ? $question->answer->listen : $question->answer->listen_virtual;
+                $data['like'] = ($question->answer->like_virtual == 0) ? $question->answer->like : $question->answer->like_virtual;
                 $datas[] = $data;
             }
             return Code::response(0, $datas);
