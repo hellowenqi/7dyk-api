@@ -365,8 +365,8 @@ class QuestionController extends Controller
                 $data['teacher_name'] = $listen->answer->question->teacher->wechat;
                 $data['teacher_face'] = $listen->answer->question->teacher->face;
                 $data['teacher_position'] = $listen->answer->question->teacher->position;
-                $data['listen'] = $listen->answer->listen;
-                $data['like'] = $listen->answer->like;
+                $data['listen'] = ($listen->answer->listen_virtual == 0) ? $listen->answer->listen : $listen->answer->listen_virtual;
+                $data['like'] = ($listen->answer->like_virtual == 0) ? $listen->answer->like : $listen->answer->like_virtual;
                 $datas[] = $data;
             }
 
