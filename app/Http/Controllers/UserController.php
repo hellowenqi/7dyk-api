@@ -11,8 +11,8 @@ use Session;
 use Request;
 use Redirect;
 use Cache;
+use DB;
 
-use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller {
 

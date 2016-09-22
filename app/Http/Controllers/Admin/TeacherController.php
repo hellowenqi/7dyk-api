@@ -7,7 +7,10 @@ use App\Http\Controllers\Controller;
 //use App\Models\Answer;
 use App\Models\User;
 use App\Models\Teacher;
+use App\Models\Question;
+use App\Models\Answer;
 use App\Code;
+use League\Flysystem\Exception;
 use Request;
 use Session;
 use Illuminate\Support\Facades\DB;
@@ -83,13 +86,30 @@ class TeacherController extends Controller {
             $datas['total'] = $total;
             $datas['datas'] = $data;
             return Code::response(0, $datas);
-
         } else {
             return Code::response(100);
         }
     }
+    public function deleteTeacher() {
+        $id = Request::get("id");
+        DB::beginTransaction();
+        try{
+            Question::where('answer_user_id', $id)->delete();
+            Answer::where('answer_user_id', $id)->delete();
+            Teacher::where('user_id', $id)->delete();
+            $model = User::find($id);
+            if($model){
+                $model->isteacher = 0;
+                $model->save();
+            }
+            DB::commit();
+            return Code::response(0);
+        }catch (Exception $e){
+            DB::rollBack();
+            return Code::response(404);
+        }
 
-
+    }
     public function teacherModify(){
         if(!Request::has('teacher_id')) return Code::response(100);
         $teacher_id = Request::get('teacher_id');
