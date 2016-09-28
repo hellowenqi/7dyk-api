@@ -18,6 +18,8 @@
         return new SuccessResponse();
 });*/
 
+//use Session;
+//use Config;
 
 Route::get('/', 'WelcomeController@index');
 
@@ -102,7 +104,12 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
         });
         Route::group(['prefix' => 'login'], function() {
             Route::post('/', 'LoginController@login');
-            Route::get('/code','LoginController@code');
+            Route::get('code','LoginController@code');
+        });
+        Route::get('logout',function(){
+            Session::flush();
+            header("Location: " . Config::get('urls.adminLogin'));
+            exit;
         });
     });
 });
