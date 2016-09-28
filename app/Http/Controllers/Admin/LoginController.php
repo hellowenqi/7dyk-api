@@ -25,7 +25,7 @@ class LoginController extends Controller {
 		if($captcha && $captcha == Session::get('captcha')){
 			Session::put('captcha', '');
 		}else{
-			return Code::response(404, "请求：$captcha 正确:$aa 验证码错误");
+			return Code::response(404, "验证码错误");
 		}
 		if($username && $password){
 			DB::enableQueryLog();
