@@ -172,6 +172,10 @@ class UserController extends Controller {
             $introduction = Request::get('introduction');
             $user->introduction = $introduction;
         }
+        if(Request::has("name")){
+            $name = Request::get("name");
+            $user->wechat = $name;
+        }
         if(Request::has("prize")) {
             $teacher = Teacher::where('user_id', $id)->first();
             if(!$teacher){
@@ -182,7 +186,6 @@ class UserController extends Controller {
         }
         $user->save();
         return Code::response(0, $user);
-
     }
 
     public function getUsernow() {

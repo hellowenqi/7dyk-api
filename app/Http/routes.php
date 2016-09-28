@@ -47,7 +47,7 @@ Route::group(['prefix' => 'api'], function() {
                 Route::any('getteacheranswer', 'UserController@getTeacheranswer');
                 Route::any('getuserinfo', 'UserController@getUserinfo');
                 Route::any('getusernow', 'UserController@getUsernow');
-                Route::any('editusernow', 'UserController@editUsernow');
+                Route::post('editusernow', 'UserController@editUsernow');
                 Route::any('beteacher', 'UserController@beTeacher');
             });
             Route::group(['prefix' => 'answer'], function() {
