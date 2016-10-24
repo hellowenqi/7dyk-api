@@ -107,7 +107,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
             Route::get('code','LoginController@code');
         });
         Route::get('logout',function(){
-            Session::flush();
+            Session::forget('adminId');
             header("Location: " . Config::get('urls.adminLogin'));
             exit;
         });
