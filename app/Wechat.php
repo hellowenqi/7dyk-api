@@ -110,6 +110,7 @@ class Wechat extends BaseModel {
             'grant_type'    =>  'authorization_code',
         ));
         $response = json_decode($curl->response);
+
         Cache::put('access_token', $response->access_token, 110);
         Cache::put('opneid', $response->openid, 110);
         //这里没有用到refresh_token,用户量大以后可以使用
