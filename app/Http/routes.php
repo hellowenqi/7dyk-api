@@ -109,7 +109,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
         Route::get('logout',function(){
             Session::forget('adminId');
             header("Location: " . Config::get('urls.adminLogin'));
-            exit;
         });
     });
 });
