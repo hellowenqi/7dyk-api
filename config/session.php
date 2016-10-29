@@ -16,8 +16,7 @@ return [
 	|
 	*/
 
-	//'driver' => env('SESSION_DRIVER', 'file'),
-	'driver' => env('SESSION_DRIVER', 'memcached'),
+	'driver' => env('SESSION_DRIVER', 'file'),
 
 	/*
 	|--------------------------------------------------------------------------

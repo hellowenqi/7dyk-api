@@ -73,8 +73,8 @@ Route::group(['prefix' => 'api'], function() {
 //后台管理员
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
     Route::group(['prefix' => 'v1'], function() {
-        Route::group(['middleware' => 'adminauth'],function(){
-//        Route::group([],function(){
+//        Route::group(['middleware' => 'adminauth'],function(){
+        Route::group([],function(){
             Route::group(['prefix' => 'question'], function() {
                 Route::get('/', 'QuestionController@getList');
                 Route::post('setQuestionOrder', 'QuestionController@setQuestionOrder');
@@ -100,6 +100,12 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
                 Route::post('add', 'HotController@add');
                 Route::post('delete', 'HotController@destroy');
                 Route::post('update', 'HotController@update');
+            });
+            //图片的存储和列表显示
+            Route::group(['prefix' => 'pic'], function(){
+                Route::get('/', 'PictureController@index');
+                Route::post('upload', 'PictureController@upload');
+                Route::post('delete', 'PictureController@delete');
             });
         });
         Route::group(['prefix' => 'login'], function() {

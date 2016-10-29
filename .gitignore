@@ -4,6 +4,9 @@ access.log
 .idea/
 .ssh/
 vendor/
+#config wechat和inner包含密码，不上传, session,cache,urls本地与服务器配置不同，
 config/wechat.php
 config/inner.php
+config/session.php
+config/cache.php
 app/Wechat/WxPayConfig.php

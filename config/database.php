@@ -59,11 +59,21 @@ return [
 			'username'  => env('DB_USERNAME', 'forge'),
 			'password'  => env('DB_PASSWORD', ''),
 			'charset'   => 'utf8',
-			'collation' => 'utf8_unicode_ci',
+			'collation' => 'utf8_general_ci',
 			'prefix'    => '',
 			'strict'    => false,
 		],
-
+		'mysql_picture' => [
+			'driver'    => 'mysql',
+			'host'      => env('DB_HOST_PICTURE', 'localhost'),
+			'database'  => env('DB_DATABASE_PICTURE', 'forge'),
+			'username'  => env('DB_USERNAME_PICTURE', 'forge'),
+			'password'  => env('DB_PASSWORD_PICTURE', ''),
+			'charset'   => 'utf8',
+			'collation' => 'utf8_general_ci',
+			'prefix'    => '',
+			'strict'    => false,
+		],
 		'pgsql' => [
 			'driver'   => 'pgsql',
 			'host'     => env('DB_HOST', 'localhost'),
