@@ -126,6 +126,23 @@ class CourseController extends Controller {
             return Code::response(100);
         }
     }
+    //章节列表
+    public function chapter(){
+
+    }
+    //增加章节
+    public function chapterCreate(){
+
+    }
+    //删除章节
+    public function chapterDelete(){
+
+    }
+    //修改章节
+    public function chapterUpdate(){
+
+    }
+    //课程详情
     public function chapterInfo(){
         $id = Request::get("id") || 1;
         echo $id;
