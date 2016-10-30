@@ -9,4 +9,5 @@ config/wechat.php
 config/inner.php
 config/session.php
 config/cache.php
+config/urls.php
 app/Wechat/WxPayConfig.php
