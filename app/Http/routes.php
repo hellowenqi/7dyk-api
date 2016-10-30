@@ -107,6 +107,23 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
                 Route::post('upload', 'PictureController@upload');
                 Route::post('delete', 'PictureController@delete');
             });
+            //课程
+            // admin/v1/course
+            Route::group(['prefix' => 'course'], function() {
+                Route::get('/', 'CourseController@courseList');
+                Route::post('create', 'CourseController@create');
+                Route::post('delete', 'CourseController@delete');
+                Route::post('update', 'CourseController@update');
+                Route::get('info', 'CourseController@info');
+                Route::get('affordList', 'CourseController@affordList');
+
+                Route::get('chapter', 'CourseController@chapter');
+                Route::post('chapter/create', 'CourseController@chapterCreate');
+                Route::post('chapter/delete', 'CourseController@chapterDelete');
+                Route::post('chapter/update', 'CourseController@chapterUpdate');
+                Route::get('chapter/info', 'CourseController@chapterInfo');
+            });
+
         });
         Route::group(['prefix' => 'login'], function() {
             Route::post('/', 'LoginController@login');
