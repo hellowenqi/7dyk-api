@@ -5,6 +5,7 @@ use App\Models\Admin;
 use Gregwar\Captcha\CaptchaBuilder;
 use Session;
 use Request;
+use Cookie;
 use Crypt;
 use App\Code;
 use DB;

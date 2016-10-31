@@ -56,10 +56,11 @@ class WxPayNotify extends WxPayNotifyReply
 	{
 		//TODO 用户基础该类之后需要重写该方法，成功的时候返回true，失败返回false
         $obj = Cache::get($data['attach']);
-		Mylog::order_log(json_encode($data));
+
 		$class_name = get_class($obj);
 		$obj->save();
-        if($class_name == "App\Models\Question") {
+        if($class_name == "App\\Models\\Question") {
+            Mylog::order_log('提问支付：' . json_encode($data));
 			//提问问题支付
             $teacher = Teacher::where('user_id', $obj->answer_user_id)->first();
 			$user = User::find($obj->question_user_id);
@@ -84,7 +85,8 @@ class WxPayNotify extends WxPayNotifyReply
 
 			], Config::get('urls.appurl') . 'answer/' . $obj->id, 1);
 			$teacher->user->save();
-        } else if($class_name == "App\Models\Listen") {
+        } else if($class_name == "App\\Models\\Listen") {
+            Mylog::order_log('收听支付' . json_encode($data));
 			//支付听过的
             $answer = Answer::with('teacher.teacher')->where('id', $obj->answer_id)->first();
             $answer->teacher->teacher->income += Config::get('app.DEV') ? 0.005 : 0.5;
