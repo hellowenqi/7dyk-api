@@ -25,6 +25,7 @@ Route::get('/', 'WelcomeController@index');
 
 Route::get('home', 'HomeController@index');
 Route::post('question', 'QuestionController@index');
+//手机端API
 Route::group(['prefix' => 'api'], function() {
     Route::group(['prefix' => 'v1'], function() {
         Route::group(['middleware' => 'wechatauth'], function() {
@@ -119,9 +120,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
 
                 Route::get('chapter', 'CourseController@chapter');
                 Route::post('chapter/create', 'CourseController@chapterCreate');
-                Route::post('chapter/delete', 'CourseController@chapterDelete');
-                Route::post('chapter/update', 'CourseController@chapterUpdate');
-                Route::get('chapter/info', 'CourseController@chapterInfo');
+                Route::post('chapter/delete/{id}', 'CourseController@chapterDelete');
+                Route::post('chapter/update/{id}', 'CourseController@chapterUpdate');
+                Route::get('chapter/info/{id}', 'CourseController@chapterInfo');
             });
 
         });
@@ -135,6 +136,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
         });
     });
 });
+
+//手机和后台管理员公共接口
+Route::get('audio/{name}', 'CommonController@audio');  //音频接口
+
 //内部接口
 Route::group(['prefix' => 'timer'], function() {
     Route::group(['middleware' => 'innerauth'],function() {
@@ -144,3 +149,4 @@ Route::group(['prefix' => 'timer'], function() {
         Route::get('getToken', 'TimerController@getToken');
     });
 });
+

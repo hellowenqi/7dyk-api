@@ -48,7 +48,7 @@ class PictureController extends Controller {
         $begin = dechex(hexdec($begin)/4);//取前三位除以4 落在1024之间
         $end = substr($name, -3);
         $end = dechex(hexdec($end)/4);//取前三位除以4 落在1024之间
-        $fullname = $name . '.' . $file-> getClientOriginalExtension();
+        $fullname = $name . '.' . $file->getClientOriginalExtension();
         $path = $begin . '/' . $end;
         $model->path = Config::get('urls.picUrl') . "$path/$fullname";
         $model->desc = Request::get('desc');

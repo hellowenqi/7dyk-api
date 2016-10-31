@@ -2,8 +2,11 @@
 
 use App\Code;
 use App\Http\Controllers\Controller;
+use League\Flysystem\Directory;
 use Request;
 use Session;
+use Input;
+use App\Models\Chapter;
 use App\Models\Course;
 use App\Models\CoursePay;
 /* 课程的改查
@@ -126,25 +129,99 @@ class CourseController extends Controller {
             return Code::response(100);
         }
     }
-    //章节列表
+    //章节列表d
     public function chapter(){
-
+        $page = Request::get("page");
+        $number = Request::get("number");
+        $id = Request::get("id");
+        if($page && $number && $id){
+            $datas = array();
+            $index = ($page - 1) * $number;
+            $courses = Chapter::skip($index)->take($number)->get();
+            $total = Chapter::count();
+            $datas['total'] = $total;
+            $datas['data'] = $courses;
+            return Code::response(0, $datas);
+        }else{
+            return Code::response(100);
+        }
     }
     //增加章节
     public function chapterCreate(){
-
+        $id = Request::get("course_id");
+        if(Course::find($id)){
+            $model = new Chapter();
+            $model->title = Request::get('title');
+            $model->content = Request::get('content');
+            $model->pic = Request::get('pic');
+            $model->course_id = $id;
+            $model->time = intval(Request::get('time'));
+            $file = Request::file("audio");
+            $name = uniqid();
+            $extension = $file->getClientOriginalExtension();
+            if($extension != 'mp3'){
+                return Code::response(404, "请上传mp3 格式文件");
+            }
+            $file->move(storage_path() . DIRECTORY_SEPARATOR . 'audio', "$name.$extension");
+            $model->audio = "$name.$extension";
+            if($model->save()){
+                $model->audio = action("CommonController@audio", array("$name.$extension"));
+                return Code::response(0, $model->toArray());
+            }else{
+                return Code::response(404, "保存失败");
+            }
+        }else{
+            return Code::response(404, "course_id $id 不存在");
+        }
     }
     //删除章节
-    public function chapterDelete(){
-
+    public function chapterDelete($id){
+        $model = Chapter::find($id);
+        if($model){
+            if(unlink(storage_path() . DIRECTORY_SEPARATOR . 'audio' . DIRECTORY_SEPARATOR . $model->audio)){
+                $model->delete();
+                return Code::response(0);
+            }else{
+                return Code::response(404, '删除失败');
+            };
+        }else{
+            return Code::response(404, "id 不存在");
+        }
     }
     //修改章节
-    public function chapterUpdate(){
+    public function chapterUpdate($id){
+        $model = Chapter::find($id);
+        if($model){
+            if(Request::has("title")) $model->title = Request::get('title');
+            if(Request::has("content")) $model->content = Request::get('content');
+            if(Request::has("pic")) $model->pic = Request::get('pic');
+            if(Request::has("time")) $model->time = Request::get('time');
+            if($file = Request::file("audio")){
+                $name = uniqid();
+                $extension = $file->getClientOriginalExtension();
+                if($extension != 'mp3'){
+                    return Code::response(404, "请上传mp3 格式文件");
+                }
+                $file->move(storage_path() . DIRECTORY_SEPARATOR . 'audio', "$name.$extension");
+                unlink(storage_path() . DIRECTORY_SEPARATOR . 'audio' . DIRECTORY_SEPARATOR . $model->audio);
+                $model->audio = "$name.$extension";
+                $model->save();
+                $model->audio = action("CommonController@audio", array("$name.$extension"));
+                return Code::response(0, $model->toArray());
+            }
 
+        }else{
+            return Code::response(404, "id 不存在");
+        }
     }
     //课程详情
-    public function chapterInfo(){
-        $id = Request::get("id") || 1;
-        echo $id;
+    public function chapterInfo($id){
+        $model = Chapter::find($id);
+        if($model){
+            $model->audio = action("CommonController@audio", $model->audio);
+            return Code::response(0 , $model->toArray());
+        }else{
+            return Code::response(404, "id 不存在");
+        }
     }
 }
