@@ -133,11 +133,11 @@ class CourseController extends Controller {
     public function chapter(){
         $page = Request::get("page");
         $number = Request::get("number");
-        $id = Request::get("id");
+        $id = Request::get("course_id");
         if($page && $number && $id){
             $datas = array();
             $index = ($page - 1) * $number;
-            $courses = Chapter::skip($index)->take($number)->get();
+            $courses = Chapter::select('id', 'title', 'pic', 'time', 'view_num', 'mark_num', 'course_id')->skip($index)->take($number)->get();
             $total = Chapter::count();
             $datas['total'] = $total;
             $datas['data'] = $courses;
