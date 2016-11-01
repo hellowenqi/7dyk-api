@@ -66,6 +66,14 @@ Route::group(['prefix' => 'api'], function() {
         Route::group(['prefix' => 'answer'], function() {
             Route::any('audio', 'AnswerController@audio');
         });
+        Route::group(['prefix' => 'course'], function() {
+            Route::get('userInfo', 'CourseController@userInfo');
+            Route::get('chapterList', 'CourseController@chapterList');
+            Route::get('{id}', 'CourseController@info');
+            Route::get('chapterInfo/{id}', 'CourseController@chapterInfo');
+            Route::get('chapterMark/{id}', 'CourseController@chapterMark');
+            Route::get('pay', 'CourseController@pay');
+        });
         Route::any('auth', 'UserController@auth');
         Route::any('code', 'UserController@code');
         Route::any('notify', 'AnswerController@notify');
