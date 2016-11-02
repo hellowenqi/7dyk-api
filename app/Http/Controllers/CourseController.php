@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\View;
 use Request;
 use Session;
+use Cache;
 use App\Models\CoursePay;
 use App\Wechat\WxPayConfig;
 use App\Wechat\WxPayApi;
