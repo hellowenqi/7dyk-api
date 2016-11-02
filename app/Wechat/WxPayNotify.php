@@ -55,8 +55,11 @@ class WxPayNotify extends WxPayNotifyReply
 	public function NotifyProcess($data, &$msg)
 	{
 		//TODO 用户基础该类之后需要重写该方法，成功的时候返回true，失败返回false
+		if($data['result_code'] == 'FAIL'){
+			Mylog::order_fail_log("用户付款失败". json_encode($data));
+			return true;
+		}
         $obj = Cache::get($data['attach']);
-
 		$class_name = get_class($obj);
 		$obj->save();
         if($class_name == "App\\Models\\Question") {
@@ -67,8 +70,8 @@ class WxPayNotify extends WxPayNotifyReply
 			//支出订单
 			$bill_in = new BillIn();
 			$bill_in->user_id = $user->id;
-			$bill_in->prize = $obj->prize / 100;
-			$bill_in->order = $data['attach'];
+			$bill_in->prize = $data['cash_fee'] / 100;
+			$bill_in->order = $data['out_trade_no'];
 			$bill_in->desc = "用户向导师提问支付";
 			$bill_in->time = time();
 			$bill_in->type = 1;
@@ -99,7 +102,7 @@ class WxPayNotify extends WxPayNotifyReply
 			$bill_in = new BillIn();
 			$bill_in->user_id = $obj->user_id;
 			$bill_in->prize = Config::get('app.DEV') ? 0.01 : 1;
-			$bill_in->order = $data['attach'];
+			$bill_in->order = $data['out_trade_no'];
 			$bill_in->desc = "用户收听问题支付";
 			$bill_in->time = time();
 			$bill_in->type = 2;
@@ -109,7 +112,19 @@ class WxPayNotify extends WxPayNotifyReply
 			$answer->teacher->money += Config::get('app.DEV') ? 0.005 : 0.5;
 			$answer->user->save();
 			$answer->teacher->save();
-        }
+        }else if($class_name == "App\\Models\\CoursePay"){
+			Mylog::order_log('课程支付' . json_encode($data));
+			//收入订单
+			$bill_in = new BillIn();
+			$bill_in->user_id = $obj->user_id;
+			$bill_in->prize = $data['cash_fee'] / 100;
+			$bill_in->order = $data['out_trade_no'];
+			$bill_in->desc = "用户购买课程支付";
+			$bill_in->time = time();
+			$bill_in->type = 3;
+			$bill_in->save();
+			$obj->save();
+		}
         Cache::forget($data['attach']);
 		return true;
 	}

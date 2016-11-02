@@ -9,6 +9,10 @@ use App\Models\View;
 use Request;
 use Session;
 use App\Models\CoursePay;
+use App\Wechat\WxPayConfig;
+use App\Wechat\WxPayApi;
+use App\Wechat\JsApiPay;
+use App\Wechat\WxPayUnifiedOrder;
 class CourseController extends Controller{
     //用户详情
     public function userInfo(){
@@ -92,11 +96,40 @@ class CourseController extends Controller{
         }
     }
     //支付
-    public function pay($id){
+    public function pay(){
         $course_id = Request::get("course_id");
         $model = Course::find($course_id);
         if($model){
-            $price = $model->price_now;
+            $user_id = Session::get('user_id');
+            $trade_no = WxPayConfig::MCHID.date("YmdHis");
+            $time = time();
+            $name = md5("$user_id$time");
+            $price = (int)$model->price * 100;
+            $tools = new JsApiPay();
+            $openid = Session::get('openid');
+            $openid = "on7OgwizVILjdisVtqsEhkU3WRRE";
+            $input = new WxPayUnifiedOrder();
+            $input->SetBody("购买课程【".$model->title."】");
+            $input->SetAttach($name);
+            $input->SetOut_trade_no($trade_no);
+            $input->SetTotal_fee($price);
+            date_default_timezone_set('PRC');
+            $input->SetTime_start(date("YmdHis", time()));
+            $input->SetTime_expire(date("YmdHis", time() + 600));
+            $input->SetGoods_tag("tag");
+            $input->SetNotify_url("http://h5app.7dyk.com/ama/api/public/api/v1/notify");
+            $input->SetTrade_type("JSAPI");
+            $input->SetOpenid($openid);
+            $order = WxPayApi::unifiedOrder($input);
+            $jsApiParameters = json_decode($tools->GetJsApiParameters($order));
+            $coursePay = new CoursePay();
+            $coursePay->user_id = $user_id;
+            $coursePay->course_id = $course_id;
+            $coursePay->time = time();
+            $coursePay->price = $price / 100;
+            $coursePay->order = $trade_no;
+            Cache::put($name, $coursePay, 10);
+            return Code::response(0, $jsApiParameters);
         }else{
             return Code::response(404, "课程不存在");
         }

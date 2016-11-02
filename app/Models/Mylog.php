@@ -10,7 +10,7 @@ class Mylog{
     private static $obj_log = [];
 
     //日志类型映射
-    private static $classify_arr = ['default', 'order_log','pay_log', 'pay_error_log'];
+    private static $classify_arr = ['default', 'order_log', 'order_fail_log', 'pay_log', 'pay_error_log'];
 
     /**
     * 单利初始化以及调取对象
