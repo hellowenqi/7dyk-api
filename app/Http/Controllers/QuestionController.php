@@ -380,7 +380,8 @@ class QuestionController extends Controller
     public function like(){
         if(Request::has('answer_id')) {
             $id = Request::get('answer_id');
-            $user_id = 33;
+            $user_id = Session::get('user_id');
+//            $user_id = 33;
             $answer = Answer::find($id);
             $like = Like::where('answer_id', $id)->where('user_id', $user_id)->first();
             if(isset($answer) && !isset($like)){

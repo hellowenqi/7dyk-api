@@ -103,8 +103,9 @@ class CourseController extends Controller{
             $user_id = Session::get('user_id');
             $trade_no = WxPayConfig::MCHID.date("YmdHis");
             $time = time();
-            $name = md5("$user_id$time");
-            $price = (int)($model->price * 100);
+            date_default_timezone_set('PRC');
+            $name = md5("{$user_id}{$time}");
+            $price = (int)($model->price_now * 100);
             $tools = new JsApiPay();
             $openid = Session::get('openid');
 //            $openid = "on7OgwizVILjdisVtqsEhkU3WRRE";
@@ -113,7 +114,6 @@ class CourseController extends Controller{
             $input->SetAttach($name);
             $input->SetOut_trade_no($trade_no);
             $input->SetTotal_fee($price);
-            date_default_timezone_set('PRC');
             $input->SetTime_start(date("YmdHis", time()));
             $input->SetTime_expire(date("YmdHis", time() + 600));
             $input->SetGoods_tag("tag");
