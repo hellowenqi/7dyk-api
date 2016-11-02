@@ -104,10 +104,10 @@ class CourseController extends Controller{
             $trade_no = WxPayConfig::MCHID.date("YmdHis");
             $time = time();
             $name = md5("$user_id$time");
-            $price = (int)$model->price * 100;
+            $price = (int)($model->price * 100);
             $tools = new JsApiPay();
             $openid = Session::get('openid');
-            $openid = "on7OgwizVILjdisVtqsEhkU3WRRE";
+//            $openid = "on7OgwizVILjdisVtqsEhkU3WRRE";
             $input = new WxPayUnifiedOrder();
             $input->SetBody("购买课程【".$model->title."】");
             $input->SetAttach($name);
