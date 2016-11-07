@@ -19,6 +19,7 @@ class CommonController extends Controller{
         }elseif ($adminId){
             $flag = true;
         }
+        $flag = true;
         if($flag){//有权限
             $mp3 = file_get_contents(storage_path() . DIRECTORY_SEPARATOR . "audio" . DIRECTORY_SEPARATOR . $name);
             header("Content-type:audio/mp3");

@@ -9,6 +9,7 @@ use Input;
 use App\Models\Chapter;
 use App\Models\Course;
 use App\Models\CoursePay;
+use App\Models\Audio;
 /* 课程的改查
  * 章节的增删改查
  * */
@@ -85,7 +86,7 @@ class CourseController extends Controller {
                 return Code::response(404, '错误！');
             }
         }else{
-            Code::response(404, 'id错误');
+            return Code::response(404, 'id错误');
         }
     }
     //查看课程
@@ -156,16 +157,19 @@ class CourseController extends Controller {
             $model->pic = Request::get('pic');
             $model->course_id = $id;
             $model->time = intval(Request::get('time'));
-            $file = Request::file("audio");
-            $name = uniqid();
-            $extension = $file->getClientOriginalExtension();
-            if($extension != 'mp3'){
-                return Code::response(404, "请上传mp3 格式文件");
+            $model->audio = Request::get("audio");
+            if($model->title == ''
+                || $model->content == ""
+                || $model->pic==""
+                || $model->time==0
+                || $model->audio == ""
+            ){
+                return Code::response(100);
             }
-            $file->move(storage_path() . DIRECTORY_SEPARATOR . 'audio', "$name.$extension");
-            $model->audio = "$name.$extension";
             if($model->save()){
-                $model->audio = action("CommonController@audio", array("$name.$extension"));
+                $audio_model = Audio::where("path", $model->audio)->first();
+                if($audio_model) $audio_model->delete();
+                $model->audio = action("CommonController@audio", array($model->audio));
                 return Code::response(0, $model->toArray());
             }else{
                 return Code::response(404, "保存失败");
@@ -196,20 +200,18 @@ class CourseController extends Controller {
             if(Request::has("content")) $model->content = Request::get('content');
             if(Request::has("pic")) $model->pic = Request::get('pic');
             if(Request::has("time")) $model->time = Request::get('time');
-            if($file = Request::file("audio")){
-                $name = uniqid();
-                $extension = $file->getClientOriginalExtension();
-                if($extension != 'mp3'){
-                    return Code::response(404, "请上传mp3 格式文件");
+            if(Request::has("audio") && Request::get("audio") != $model->audio) {
+                $audio = Request::get("audio");
+                $audio_model = Audio::where("path", $audio)->first();
+                if($audio_model){
+//                    unlink(storage_path() . DIRECTORY_SEPARATOR . 'audio' . DIRECTORY_SEPARATOR . $audio_model->path);
+                    $audio_model->delete();
                 }
-                $file->move(storage_path() . DIRECTORY_SEPARATOR . 'audio', "$name.$extension");
-                unlink(storage_path() . DIRECTORY_SEPARATOR . 'audio' . DIRECTORY_SEPARATOR . $model->audio);
-                $model->audio = "$name.$extension";
-                $model->save();
-                $model->audio = action("CommonController@audio", array("$name.$extension"));
-                return Code::response(0, $model->toArray());
+                $model->audio = $audio;
             }
-
+            $model->save();
+            $model->audio = action("CommonController@audio", array($model->audio));
+            return Code::response(0, $model->toArray());
         }else{
             return Code::response(404, "id 不存在");
         }
@@ -222,6 +224,27 @@ class CourseController extends Controller {
             return Code::response(0 , $model->toArray());
         }else{
             return Code::response(404, "id 不存在");
+        }
+    }
+    public function uploadAudio(){
+        $file = Request::file("audio");
+        if(null != $file){
+            $name = uniqid();
+            $extension = $file->getClientOriginalExtension();
+            if($extension != 'mp3'){
+                return Code::response(404, "请上传mp3 格式文件");
+            }
+            $file->move(storage_path() . DIRECTORY_SEPARATOR . 'audio', "$name.$extension");
+            $model = new Audio();
+            $model->path = "$name.$extension";
+            if($model->save()){
+                $model->audio = action("CommonController@audio", array("$name.$extension"));
+                return Code::response(0, $model->toArray());
+            }else{
+                return Code::response(404, "保存失败");
+            }
+        }else{
+            return Code::response(404, "文件的字段为audio");
         }
     }
 }
