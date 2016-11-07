@@ -6,10 +6,12 @@ use League\Flysystem\Directory;
 use Request;
 use Session;
 use Input;
+use Config;
 use App\Models\Chapter;
 use App\Models\Course;
 use App\Models\CoursePay;
 use App\Models\Audio;
+use App\Models\Picture;
 /* 课程的改查
  * 章节的增删改查
  * */
@@ -237,6 +239,7 @@ class CourseController extends Controller {
             $file->move(storage_path() . DIRECTORY_SEPARATOR . 'audio', "$name.$extension");
             $model = new Audio();
             $model->path = "$name.$extension";
+            $model->time = time();
             if($model->save()){
                 $model->audio = action("CommonController@audio", array("$name.$extension"));
                 return Code::response(0, $model->toArray());
@@ -246,5 +249,64 @@ class CourseController extends Controller {
         }else{
             return Code::response(404, "文件的字段为audio");
         }
+    }
+    public function richEditor(){
+        $action = Request::get("action");
+        $file = Request::file("upfile");
+        header("Content-Type: text/html; charset=utf-8");
+        if($file == null){
+            echo json_encode(['state'=> "配置imageFieldName为upfile"]);
+            return;
+        }
+
+        $result = array();
+        switch ($action) {
+                /* 上传图片 */
+            case 'uploadimage':
+                //生出图片
+                $model = new Picture();
+                $model->name = $file->getClientOriginalName();
+                $name = md5(uniqid(true));
+                $begin = substr($name, 0, 3);
+                $begin = dechex(hexdec($begin)/4);//取前三位除以4 落在1024之间
+                $end = substr($name, -3);
+                $end = dechex(hexdec($end)/4);//取前三位除以4 落在1024之间
+                $fullname = $name . '.' . $file->getClientOriginalExtension();
+                $path = $begin . '/' . $end;
+                $model->path = Config::get('urls.picUrl') . "$path/$fullname";
+                $model->desc = "富文本";
+                $model->time = time();
+                $movePath = Config::get('urls.picPath') . '/' . $path;
+                $movePath = str_replace('/', DIRECTORY_SEPARATOR, $movePath);
+                $result['state'] = "SUCCESS";
+                $result['url'] = $model->path;
+                $result['title'] = $fullname;
+                $result['original'] = $file->getClientOriginalName();
+                $result['type'] = $file->getClientOriginalExtension();
+                $result['size'] = $file->getSize();
+                if($file->move($movePath, $fullname)){//移动文件
+                    $model->save();
+                }
+                /* 上传涂鸦 */
+            //case 'uploadscrawl':
+                /* 上传视频 */
+            //case 'uploadvideo':
+                /* 上传文件 */
+            //case 'uploadfile':
+        }
+        //输出jsonp
+        if(Request::has('callback')){
+            $callback = Request::get("callback");
+            if (preg_match("/^[\w_]+$/", $callback)) {
+                echo htmlspecialchars($callback) . '(' . json_encode($result) . ')';
+            } else {
+                echo json_encode(array(
+                    'state'=> 'callback参数不合法'
+                ));
+            }
+        }else{
+            echo json_encode($result);
+        }
+
     }
 }

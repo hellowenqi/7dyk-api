@@ -126,6 +126,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
                 Route::get('info', 'CourseController@info');
                 Route::get('affordList', 'CourseController@affordList');
                 Route::post("uploadAudio", 'CourseController@uploadAudio');
+                Route::post("richEditor", 'CourseController@richEditor');
 
                 Route::get('chapter', 'CourseController@chapter');
                 Route::post('chapter/create', 'CourseController@chapterCreate');
