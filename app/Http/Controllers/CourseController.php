@@ -55,7 +55,7 @@ class CourseController extends Controller{
             if($model->is_free == 1 || CoursePay::where("course_id", $course_id)->where("user_id", $user_id)->first()){
                 $view = View::where("user_id", $user_id)->where("chapter_id", $id)->first();
                 $mark = Mark::where("user_id", $user_id)->where("chapter_id", $id)->first();
-                $marks_model = Mark::with("user")->where("chapter_id", $id)->get();
+                $marks_model = Mark::with("user")->where("chapter_id", $id)->take(20)->get();
                 $marks = [];
                 foreach ($marks_model as $item){
                     $marks[] = [
