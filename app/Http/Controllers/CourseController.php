@@ -34,7 +34,7 @@ class CourseController extends Controller{
     //章节列表
     public function chapterList(){
         $course_id = Request::get("course_id");
-        $chapters = Chapter::where("course_id", $course_id)->get()->toArray();
+        $chapters = Chapter::where("course_id", $course_id)->orderBy("time", "asc")->get()->toArray();
         $views = View::where("user_id", Session::get('user_id'))->get()->toArray();
         $marks = Mark::where("user_id", Session::get("user_id"))->get()->toArray();
         foreach ($chapters as &$chapter){
@@ -52,9 +52,19 @@ class CourseController extends Controller{
             //鉴权
             $course_id = $model->course->id;
             $user_id =  Session::get("user_id") | 30;
-            if(CoursePay::where("course_id", $course_id)->where("user_id", $user_id)->first()){
+            if($model->is_free == 1 || CoursePay::where("course_id", $course_id)->where("user_id", $user_id)->first()){
                 $view = View::where("user_id", $user_id)->where("chapter_id", $id)->first();
                 $mark = Mark::where("user_id", $user_id)->where("chapter_id", $id)->first();
+                $marks_model = Mark::with("user")->where("chapter_id", $id)->get();
+                $marks = [];
+                foreach ($marks_model as $item){
+                    $marks[] = [
+                        'face' => $item->user->face,
+                        'user_id' => $item->user->id,
+                        'wechat'  => $item->user->wechat,
+                        'time' => $item->time,
+                    ];
+                }
                 $marked = $viewed = false;
                 if($view == null){
                     $view = new View();
@@ -70,7 +80,7 @@ class CourseController extends Controller{
                 if($mark) $marked = true;
                 $data = $model->toArray();
                 $data['audio'] = $model->audio = action("CommonController@audio", array($model->audio));
-                return Code::response(0, array_merge($data, ['viewed'=>$viewed, 'marked'=>$marked]));
+                return Code::response(0, array_merge($data, ['viewed'=>$viewed, 'marked'=>$marked, "marks" =>$marks]));
             }else{
                 return Code::response(404, "没有购买课程，不能查看");
             }

@@ -140,7 +140,7 @@ class CourseController extends Controller {
         if($page && $number && $id){
             $datas = array();
             $index = ($page - 1) * $number;
-            $courses = Chapter::select('id', 'title', 'pic', 'time', 'view_num', 'mark_num', 'course_id')->where('course_id', $id)->skip($index)->take($number)->get();
+            $courses = Chapter::select('id', 'title', 'pic', 'time', 'view_num', 'mark_num', 'course_id', 'is_free')->where('course_id', $id)->orderBy("time", 'asc')->skip($index)->take($number)->get();
             $total = Chapter::count();
             $datas['total'] = $total;
             $datas['data'] = $courses;
@@ -160,11 +160,13 @@ class CourseController extends Controller {
             $model->course_id = $id;
             $model->time = intval(Request::get('time'));
             $model->audio = Request::get("audio");
+            $model->is_free = intval(Request::get("is_free"));
             if($model->title == ''
                 || $model->content == ""
                 || $model->pic==""
                 || $model->time==0
                 || $model->audio == ""
+                || $model->is_free !== 1 && $model->is_free !== 2
             ){
                 return Code::response(100);
             }
@@ -202,6 +204,12 @@ class CourseController extends Controller {
             if(Request::has("content")) $model->content = Request::get('content');
             if(Request::has("pic")) $model->pic = Request::get('pic');
             if(Request::has("time")) $model->time = Request::get('time');
+            if(Request::has("is_free")){
+                $is_free = intval(Request::get("is_free"));
+                if($is_free === 1|| $is_free === 2){
+                    $model->is_free = $is_free;
+                }
+            }
             if(Request::has("audio") && Request::get("audio") != $model->audio) {
                 $audio = Request::get("audio");
                 $audio_model = Audio::where("path", $audio)->first();
