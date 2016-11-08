@@ -295,8 +295,8 @@ class CourseController extends Controller {
                 }else{
                 }
                 $result['state'] = "SUCCESS";
-                $result['url'] = Config::get('urls.picUrl') . '/' . $fullpath;
-                $result['title'] = $fullname;
+                $result['url'] = $fullpath;
+                $result['title'] = $fullpath;
                 $result['original'] = $file->getClientOriginalName();
                 $result['type'] = $file->getClientOriginalExtension();
                 $result['size'] = $file->getClientSize();
