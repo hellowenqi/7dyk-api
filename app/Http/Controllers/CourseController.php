@@ -68,7 +68,9 @@ class CourseController extends Controller{
                     $viewed = true;
                 }
                 if($mark) $marked = true;
-                return Code::response(0, array_merge($model->toArray()), ['viewed'=>$viewed, 'marked'=>$marked]);
+                $data = $model->toArray();
+                $data['audio'] = $model->audio = action("CommonController@audio", array($model->audio));
+                return Code::response(0, array_merge($data, ['viewed'=>$viewed, 'marked'=>$marked]));
             }else{
                 return Code::response(404, "没有购买课程，不能查看");
             }

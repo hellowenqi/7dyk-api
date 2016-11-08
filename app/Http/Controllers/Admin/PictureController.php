@@ -52,7 +52,7 @@ class PictureController extends Controller {
         $fullname = $name . '.' . $file->getClientOriginalExtension();
         $path = $begin . '/' . $end;
         $fullpath = $path . '/' . $fullname;
-        $picture_model = Picture::where("path", $fullpath);
+        $picture_model = Picture::where("path", $fullpath)->first();
         if($picture_model){
             return Code::response(0, $picture_model->toArray());
         }
@@ -65,7 +65,7 @@ class PictureController extends Controller {
         $movePath = str_replace('/', DIRECTORY_SEPARATOR, $movePath);
         if($file->move($movePath, $fullname)){//移动文件
             $model->save();
-            return Code::response(0, Config::get('urls.picPath') . $model->path);
+            return Code::response(0, Config::get('urls.picUrl') . '/' . $model->path);
         }
     }
 }

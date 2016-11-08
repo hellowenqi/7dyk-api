@@ -255,7 +255,6 @@ class CourseController extends Controller {
         $action = Request::get("action");
         $file = Request::file("upfile");
         header("Content-Type: text/html; charset=utf-8");
-
         $result = array();
         switch ($action) {
                 /* 上传图片 */
@@ -265,29 +264,34 @@ class CourseController extends Controller {
                     echo json_encode(['state'=> "配置imageFieldName为upfile"]);
                     return;
                 }
-                $model = new Picture();
-                $model->name = $file->getClientOriginalName();
-                $name = md5(uniqid(true));
+                $name = md5_file($file->getRealPath());
                 $begin = substr($name, 0, 3);
                 $begin = dechex(hexdec($begin)/4);//取前三位除以4 落在1024之间
                 $end = substr($name, -3);
                 $end = dechex(hexdec($end)/4);//取前三位除以4 落在1024之间
                 $fullname = $name . '.' . $file->getClientOriginalExtension();
                 $path = $begin . '/' . $end;
-                $model->path = Config::get('urls.picUrl') . "$path/$fullname";
-                $model->desc = "富文本";
-                $model->time = time();
-                $movePath = Config::get('urls.picPath') . '/' . $path;
-                $movePath = str_replace('/', DIRECTORY_SEPARATOR, $movePath);
+                $fullpath = $path . '/' . $fullname;
+                $picture_model = Picture::where("path", $fullpath)->first();
+                if($picture_model == null){
+                    $model = new Picture();
+                    $model->name = $file->getClientOriginalName();
+                    $model->path = $fullpath;
+                    $model->desc = "富文本";
+                    $model->time = time();
+                    $movePath = Config::get('urls.picPath') . '/' . $path;
+                    $movePath = str_replace('/', DIRECTORY_SEPARATOR, $movePath);
+                    if($file->move($movePath, $fullname)){//移动文件
+                        $model->save();
+                    }
+                }else{
+                }
                 $result['state'] = "SUCCESS";
-                $result['url'] = $model->path;
+                $result['url'] = Config::get('urls.picUrl') . '/' . $fullpath;
                 $result['title'] = $fullname;
                 $result['original'] = $file->getClientOriginalName();
                 $result['type'] = $file->getClientOriginalExtension();
-                $result['size'] = $file->getSize();
-                if($file->move($movePath, $fullname)){//移动文件
-                    $model->save();
-                }
+                $result['size'] = $file->getClientSize();
             break;
             case 'config':
                 $result = json_decode(preg_replace("/\/\*[\s\S]+?\*\//", "", file_get_contents( config_path() . DIRECTORY_SEPARATOR . "config.json")));
