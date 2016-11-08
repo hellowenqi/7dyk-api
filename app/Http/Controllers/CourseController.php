@@ -17,7 +17,7 @@ use App\Wechat\WxPayUnifiedOrder;
 class CourseController extends Controller{
     //用户详情
     public function userInfo(){
-        $user_id = Session::get("user_id") | 33;;
+        $user_id = Session::get("user_id") | 30;;
         $isPaid = CoursePay::select('course_id')->where("user_id", $user_id)->get()->toArray();
         $model = User::find($user_id)->toArray();
         return Code::response(0, array_merge($model, ["isPaid" => $isPaid]));
@@ -51,7 +51,7 @@ class CourseController extends Controller{
         if($model){
             //鉴权
             $course_id = $model->course->id;
-            $user_id =  Session::get("user_id") | 33;
+            $user_id =  Session::get("user_id") | 30;
             if(CoursePay::where("course_id", $course_id)->where("user_id", $user_id)->first()){
                 $view = View::where("user_id", $user_id)->where("chapter_id", $id)->first();
                 $mark = Mark::where("user_id", $user_id)->where("chapter_id", $id)->first();
@@ -80,7 +80,7 @@ class CourseController extends Controller{
     public function chapterMark($id){
         $chapter = Chapter::find($id);
         if($chapter){
-            $user_id = Session::get("user_id") | 33;
+            $user_id = Session::get("user_id") | 30;
             $mark = Mark::where("user_id", $user_id)->where("chapter_id", $id)->first();
             if($mark == null){
                 $mark = new Mark();

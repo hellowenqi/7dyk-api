@@ -62,14 +62,14 @@ Route::group(['prefix' => 'api'], function() {
                 Route::post('delete', 'HistoryController@destroy');
             });
             Route::get('hot', 'HistoryController@hotList');
-            Route::group(['prefix' => 'course'], function() {
-                Route::get('userInfo', 'CourseController@userInfo');
-                Route::get('chapterList', 'CourseController@chapterList');
-                Route::get('pay', 'CourseController@pay');
-                Route::get('{id}', 'CourseController@info');
-                Route::get('chapterInfo/{id}', 'CourseController@chapterInfo');
-                Route::get('chapterMark/{id}', 'CourseController@chapterMark');
-            });
+        });
+        Route::group(['prefix' => 'course'], function() {
+            Route::get('userInfo', 'CourseController@userInfo');
+            Route::get('chapterList', 'CourseController@chapterList');
+            Route::get('pay', 'CourseController@pay');
+            Route::get('{id}', 'CourseController@info');
+            Route::get('chapterInfo/{id}', 'CourseController@chapterInfo');
+            Route::get('chapterMark/{id}', 'CourseController@chapterMark');
         });
         Route::group(['prefix' => 'answer'], function() {
             Route::any('audio', 'AnswerController@audio');
