@@ -230,6 +230,7 @@ class CourseController extends Controller {
     }
     public function uploadAudio(){
         $file = Request::file("audio");
+//        var_dump($_POST);
         if(null != $file){
             $name = uniqid();
             $extension = $file->getClientOriginalExtension();
@@ -254,16 +255,16 @@ class CourseController extends Controller {
         $action = Request::get("action");
         $file = Request::file("upfile");
         header("Content-Type: text/html; charset=utf-8");
-        if($file == null){
-            echo json_encode(['state'=> "配置imageFieldName为upfile"]);
-            return;
-        }
 
         $result = array();
         switch ($action) {
                 /* 上传图片 */
             case 'uploadimage':
                 //生出图片
+                if($file == null){
+                    echo json_encode(['state'=> "配置imageFieldName为upfile"]);
+                    return;
+                }
                 $model = new Picture();
                 $model->name = $file->getClientOriginalName();
                 $name = md5(uniqid(true));
@@ -287,6 +288,12 @@ class CourseController extends Controller {
                 if($file->move($movePath, $fullname)){//移动文件
                     $model->save();
                 }
+            break;
+            case 'config':
+                $result = json_decode(preg_replace("/\/\*[\s\S]+?\*\//", "", file_get_contents( config_path() . DIRECTORY_SEPARATOR . "config.json")));
+                break;
+            default:
+                break;
                 /* 上传涂鸦 */
             //case 'uploadscrawl':
                 /* 上传视频 */
