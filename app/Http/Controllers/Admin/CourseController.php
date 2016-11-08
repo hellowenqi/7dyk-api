@@ -298,7 +298,7 @@ class CourseController extends Controller {
                 $result['url'] = $fullpath;
                 $result['title'] = $fullpath;
                 $result['original'] = $file->getClientOriginalName();
-                $result['type'] = $file->getClientOriginalExtension();
+                $result['type'] = "." . $file->getClientOriginalExtension();
                 $result['size'] = $file->getClientSize();
             break;
             case 'config':
