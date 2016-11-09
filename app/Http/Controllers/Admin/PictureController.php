@@ -55,7 +55,7 @@ class PictureController extends Controller {
         $picture_model = Picture::where("path", $fullpath)->first();
         if($picture_model){
             $data =  $picture_model->toArray();
-            $data['path'] = Config::get('urls.picUrl') . '/' . $data['path'];
+            $data['path'] = Config::get('urls.picUrl') . $data['path'];
             return Code::response(0, $data);
         }
         $model = new Picture();
@@ -67,7 +67,9 @@ class PictureController extends Controller {
         $movePath = str_replace('/', DIRECTORY_SEPARATOR, $movePath);
         if($file->move($movePath, $fullname)){//移动文件
             $model->save();
-            return Code::response(0, Config::get('urls.picUrl') . '/' . $model->path);
+            $data =  $model->toArray();
+            $data['path'] = Config::get('urls.picUrl') . $data['path'];
+            return Code::response(0, $data);
         }
     }
 }
