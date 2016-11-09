@@ -173,7 +173,7 @@ class CourseController extends Controller {
             if($model->save()){
                 $audio_model = Audio::where("path", $model->audio)->first();
                 if($audio_model) $audio_model->delete();
-                $model->audio = "http://h5app.7dyk.com/ama/api/public/audio/" . $model->audio;
+                $model->audio = Config::get("urls.appurl") . 'audio/' . $model->audio;
                 return Code::response(0, $model->toArray());
             }else{
                 return Code::response(404, "保存失败");
@@ -220,7 +220,7 @@ class CourseController extends Controller {
                 $model->audio = $audio;
             }
             $model->save();
-            $model->audio = "http://h5app.7dyk.com/ama/api/public/audio/" . $model->audio;
+            $model->audio = Config::get("urls.appurl") . 'audio/' . $model->audio;
             return Code::response(0, $model->toArray());
         }else{
             return Code::response(404, "id 不存在");
@@ -230,7 +230,7 @@ class CourseController extends Controller {
     public function chapterInfo($id){
         $model = Chapter::find($id);
         if($model){
-            $model->audio = "http://h5app.7dyk.com/ama/api/public/audio/" . $model->audio;
+            $model->audio = Config::get("urls.appurl") . 'audio/' . $model->audio;
             return Code::response(0 , $model->toArray());
         }else{
             return Code::response(404, "id 不存在");
@@ -250,7 +250,7 @@ class CourseController extends Controller {
             $model->path = "$name.$extension";
             $model->time = time();
             if($model->save()){
-                $model->audio = "http://h5app.7dyk.com/ama/api/public/audio/" . "$name.$extension";
+                $model->audio = Config::get("urls.appurl") . 'audio/' . "$name.$extension";
                 return Code::response(0, $model->toArray());
             }else{
                 return Code::response(404, "保存失败");
@@ -263,8 +263,8 @@ class CourseController extends Controller {
         $action = Request::get("action");
         $file = Request::file("upfile");
         header("Content-Type: text/html; charset=utf-8");
-        header("Access-Control-Allow-Origin:http://localhost:8080");
         header("Access-Control-Allow-Methods:GET,POST,OPTIONS");
+        header("Access-Control-Allow-Origin:*");
         header("Access-Control-Allow-Headers: Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With");
         $result = array();
         switch ($action) {
