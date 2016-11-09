@@ -54,7 +54,9 @@ class PictureController extends Controller {
         $fullpath = $path . '/' . $fullname;
         $picture_model = Picture::where("path", $fullpath)->first();
         if($picture_model){
-            return Code::response(0, $picture_model->toArray());
+            $data =  $picture_model->toArray();
+            $data['path'] = Config::get('urls.picUrl') . '/' . $data['path'];
+            return Code::response(0, $data);
         }
         $model = new Picture();
         $model->name = $file->getClientOriginalName();
