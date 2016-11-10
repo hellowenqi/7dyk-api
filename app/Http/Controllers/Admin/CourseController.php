@@ -170,8 +170,11 @@ class CourseController extends Controller {
             ){
                 return Code::response(100);
             }
+            $arrs = explode('/', $model->audio);
+            $path = $arrs[count($arrs) - 1];
+            $model->audio = $path;
             if($model->save()){
-                $audio_model = Audio::where("path", $model->audio)->first();
+                $audio_model = Audio::where("path", $path)->first();
                 if($audio_model) $audio_model->delete();
                 $model->audio = Config::get("urls.appurl") . 'audio/' . $model->audio;
                 return Code::response(0, $model->toArray());
@@ -210,14 +213,14 @@ class CourseController extends Controller {
                     $model->is_free = $is_free;
                 }
             }
-            if(Request::has("audio") && Request::get("audio") != $model->audio) {
+            if(Request::has("audio")){
                 $audio = Request::get("audio");
-                $audio_model = Audio::where("path", $audio)->first();
-                if($audio_model){
-//                    unlink(storage_path() . DIRECTORY_SEPARATOR . 'audio' . DIRECTORY_SEPARATOR . $audio_model->path);
-                    $audio_model->delete();
+                $arrs = explode('/', $audio);
+                $path = $arrs[count($arrs) - 1];
+                if($path != $model->audio){
+                    $model->audio = $path;
+                    unlink(storage_path() . DIRECTORY_SEPARATOR . $path);
                 }
-                $model->audio = $audio;
             }
             $model->save();
             $model->audio = Config::get("urls.appurl") . 'audio/' . $model->audio;
@@ -298,8 +301,8 @@ class CourseController extends Controller {
                 }else{
                 }
                 $result['state'] = "SUCCESS";
-                $result['url'] = $fullpath;
-                $result['title'] = $fullpath;
+                $result['url'] = Config::get("urls.picUrl") . $fullpath;
+                $result['title'] = $fullname;
                 $result['original'] = $file->getClientOriginalName();
                 $result['type'] = "." . $file->getClientOriginalExtension();
                 $result['size'] = $file->getClientSize();
