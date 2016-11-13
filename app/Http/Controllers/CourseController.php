@@ -128,7 +128,6 @@ class CourseController extends Controller{
         }
         $model = Course::find($course_id);
         if($model){
-            $user_id = Session::get('user_id');
             $trade_no = WxPayConfig::MCHID.date("YmdHis");
             $time = time();
             date_default_timezone_set('PRC');
