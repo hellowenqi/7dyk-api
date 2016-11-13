@@ -122,6 +122,10 @@ class CourseController extends Controller{
     //支付
     public function pay(){
         $course_id = Request::get("course_id");
+        $user_id = Session::get("user_id") | 30;
+        if(CoursePay::where("user_id", $user_id)->where("course_id", $course_id)->first()){
+            return Code::response(404, "该课程已经付过款了");
+        }
         $model = Course::find($course_id);
         if($model){
             $user_id = Session::get('user_id');
