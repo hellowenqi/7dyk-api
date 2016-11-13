@@ -132,7 +132,7 @@ class CourseController extends Controller {
             return Code::response(100);
         }
     }
-    //章节列表d
+    //章节列表
     public function chapter(){
         $page = Request::get("page");
         $number = Request::get("number");
@@ -140,7 +140,7 @@ class CourseController extends Controller {
         if($page && $number && $id){
             $datas = array();
             $index = ($page - 1) * $number;
-            $courses = Chapter::select('id', 'title', 'pic', 'time', 'view_num', 'mark_num', 'course_id', 'is_free')->where('course_id', $id)->orderBy("time", 'asc')->skip($index)->take($number)->get();
+            $courses = Chapter::select('id', 'title', 'pic', 'time', 'view_num', 'mark_num', 'course_id', 'is_free')->where('course_id', $id)->orderBy("time", 'desc')->skip($index)->take($number)->get();
             $total = Chapter::count();
             $datas['total'] = $total;
             $datas['data'] = $courses;
@@ -247,8 +247,8 @@ class CourseController extends Controller {
         if(null != $file){
             $name = uniqid();
             $extension = $file->getClientOriginalExtension();
-            if($extension != 'mp3'){
-                return Code::response(404, "请上传mp3 格式文件");
+            if($extension != 'mp3'  && $extension != 'ogg'){
+                return Code::response(404, "请上传mp3或者ogg格式文件");
             }
             $file->move(storage_path() . DIRECTORY_SEPARATOR . 'audio', "$name.$extension");
             $model = new Audio();
