@@ -23,7 +23,10 @@ class CommonController extends Controller{
         if($flag){//有权限
             $mp3 = file_get_contents(storage_path() . DIRECTORY_SEPARATOR . "audio" . DIRECTORY_SEPARATOR . $name);
             header("Content-type:audio/mp3");
+            $size = strlen($mp3);
+            header("Content-Length: $size");
             echo $mp3;
+            //header("Connection:Close");
             return;
         }else{ //无权限
             return Code::response(404, "没有权限");

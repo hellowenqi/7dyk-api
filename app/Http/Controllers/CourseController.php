@@ -131,8 +131,9 @@ class CourseController extends Controller{
             $name = md5("{$user_id}{$time}");
             $price = (int)($model->price_now * 100);
             $tools = new JsApiPay();
-            $openid = Session::get('openid');
+            //$openid = Session::get('openid');
 //            $openid = "on7OgwizVILjdisVtqsEhkU3WRRE";
+            $openid = "on7Ogwj04PIfSCxa2ypeMrGuvAGU";
             $input = new WxPayUnifiedOrder();
             $input->SetBody("购买课程【".$model->title."】");
             $input->SetAttach($name);
