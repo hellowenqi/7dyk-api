@@ -219,7 +219,9 @@ class CourseController extends Controller {
                 $path = $arrs[count($arrs) - 1];
                 if($path != $model->audio){
                     $model->audio = $path;
-                    unlink(storage_path() . DIRECTORY_SEPARATOR . $path);
+                    file_exists(storage_path() . DIRECTORY_SEPARATOR . 'audio' . DIRECTORY_SEPARATOR . $path) && unlink(storage_path() . DIRECTORY_SEPARATOR . 'audio' . DIRECTORY_SEPARATOR . $path);
+                    $audio_model = Audio::where("path", $path)->first();
+                    if($audio_model) $audio_model->delete();
                 }
             }
             $model->save();
