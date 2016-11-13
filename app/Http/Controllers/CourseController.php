@@ -35,7 +35,17 @@ class CourseController extends Controller{
     //章节列表
     public function chapterList(){
         $course_id = Request::get("course_id");
-        $chapters = Chapter::where("course_id", $course_id)->orderBy("time", "asc")->get()->toArray();
+        //查看用户是否付过款
+        $flag = false;
+        $user_id = Session::get("user_id") | 30;
+        if(CoursePay::where("user_id", $user_id)->where('course_id', $course_id)->one()){
+            $flag = true;
+        }
+        $chapters = Chapter::where("course_id", $course_id);
+        if(!$flag){
+            $chapters = $chapters->where("is_free", 1);
+        }
+        $chapters = $chapters->orderBy("time", "desc")->get()->toArray();
         $views = View::where("user_id", Session::get('user_id'))->get()->toArray();
         $marks = Mark::where("user_id", Session::get("user_id"))->get()->toArray();
         foreach ($chapters as &$chapter){
