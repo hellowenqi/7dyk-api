@@ -114,7 +114,15 @@ class CourseController extends Controller{
                 $chapter->mark_num += 1;
                 $chapter->save();
             }
-            return Code::response(0);
+            $chapters = $chapter->course->chapters;
+            $chapter_ids = [];
+            foreach ($chapters as $item){
+                $chapter_ids[] = $item->id;
+            }
+//            var_dump($chapter_ids);
+            $mark_num = Mark::whereIn('chapter_id', $chapter_ids)->where("user_id", $user_id)->count();
+//            var_dump($mark_num);
+            return Code::response(0, ['mark_num'=>$mark_num]);
         }else{
             return Code::response(404, "章节不存在");
         }
