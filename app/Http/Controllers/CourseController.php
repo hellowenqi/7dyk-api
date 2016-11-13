@@ -38,7 +38,7 @@ class CourseController extends Controller{
         //查看用户是否付过款
         $flag = false;
         $user_id = Session::get("user_id") | 30;
-        if(CoursePay::where("user_id", $user_id)->where('course_id', $course_id)->one()){
+        if(CoursePay::where("user_id", $user_id)->where('course_id', $course_id)->first()){
             $flag = true;
         }
         $chapters = Chapter::where("course_id", $course_id);
