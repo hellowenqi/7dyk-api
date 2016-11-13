@@ -124,6 +124,8 @@ class WxPayNotify extends WxPayNotifyReply
 			$bill_in->type = 3;
 			$bill_in->save();
 			$obj->save();
+		}else{
+			Mylog::order_log('未配置' . json_encode($data));
 		}
         Cache::forget($data['attach']);
 		return true;

@@ -151,7 +151,7 @@ class CourseController extends Controller{
             $coursePay->user_id = $user_id;
             $coursePay->course_id = $course_id;
             $coursePay->time = time();
-            $coursePay->price = $price / 100;
+            $coursePay->money = $price / 100;
             $coursePay->order = $trade_no;
             Cache::put($name, $coursePay, 10);
             return Code::response(0, $jsApiParameters);
