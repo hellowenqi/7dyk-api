@@ -82,7 +82,7 @@ Route::group(['prefix' => 'api'], function() {
 //后台管理员
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
     Route::group(['prefix' => 'v1'], function() {
-//        Route::group(['middleware' => 'adminauth'],function(){
+//      Route::group(['middleware' => 'adminauth'],function(){
         Route::group([],function(){
             Route::group(['prefix' => 'question'], function() {
                 Route::get('/', 'QuestionController@getList');
@@ -133,8 +133,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
                 Route::post('chapter/delete/{id}', 'CourseController@chapterDelete');
                 Route::post('chapter/update/{id}', 'CourseController@chapterUpdate');
                 Route::get('chapter/info/{id}', 'CourseController@chapterInfo');
+                Route::post('chapter/previewUpdate', 'CourseController@previewUpdate');
             });
-
         });
         Route::group(['prefix' => 'login'], function() {
             Route::post('/', 'LoginController@login');
@@ -144,6 +144,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function() {
             Session::forget('adminId');
             return Redirect::to(Config::get('urls.adminLogin'), 301);
         });
+        Route::get('course/chapter/preview', 'CourseController@preview'); //手机预览, 不鉴权
     });
 });
 

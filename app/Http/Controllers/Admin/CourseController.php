@@ -7,6 +7,7 @@ use Request;
 use Session;
 use Input;
 use Config;
+use Cache;
 use App\Models\Chapter;
 use App\Models\Course;
 use App\Models\CoursePay;
@@ -333,6 +334,30 @@ class CourseController extends Controller {
             }
         }else{
             echo json_encode($result);
+        }
+
+    }
+
+    //章节预览
+    public function previewUpdate(){
+        $chapter_id = Request::get('chapter_id');
+        if($chapter_id){
+            $data = Request::all();
+            $key = "laravel_chapter_$chapter_id";
+            Cache::put($key, json_encode($data), 10);
+            return Code::response(0, json_decode(Cache::get($key)));
+        }else{
+            return Code::response(404, "请传入chapter_id");
+        }
+    }
+    //章节预览
+    public function preview(){
+        $chapter_id = Request::get('chapter_id');
+        if($chapter_id){
+            $data = Cache::get("laravel_chapter_$chapter_id");
+            return Code::response(0, json_decode($data));
+        }else{
+            return Code::response(404, "请传入chapter_id");
         }
 
     }
