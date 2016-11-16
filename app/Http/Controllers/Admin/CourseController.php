@@ -177,7 +177,7 @@ class CourseController extends Controller {
             if($model->save()){
                 $audio_model = Audio::where("path", $path)->first();
                 if($audio_model) $audio_model->delete();
-                $model->audio = Config::get("urls.apiurl") . 'audio/' . $model->audio;
+                $model->audio = Config::get("urls.audiourl") . $model->audio;
                 return Code::response(0, $model->toArray());
             }else{
                 return Code::response(404, "保存失败");
@@ -226,7 +226,7 @@ class CourseController extends Controller {
                 }
             }
             $model->save();
-            $model->audio = Config::get("urls.apiurl") . 'audio/' . $model->audio;
+            $model->audio = Config::get("urls.audiourl") . $model->audio;
             return Code::response(0, $model->toArray());
         }else{
             return Code::response(404, "id 不存在");
@@ -236,7 +236,7 @@ class CourseController extends Controller {
     public function chapterInfo($id){
         $model = Chapter::find($id);
         if($model){
-            $model->audio = Config::get("urls.apiurl") . 'audio/' . $model->audio;
+            $model->audio = Config::get("urls.audiourl") . $model->audio;
             return Code::response(0 , $model->toArray());
         }else{
             return Code::response(404, "id 不存在");
@@ -256,7 +256,7 @@ class CourseController extends Controller {
             $model->path = "$name.$extension";
             $model->time = time();
             if($model->save()){
-                $model->audio = Config::get("urls.apiurl") . 'audio/' . "$name.$extension";
+                $model->audio = Config::get("urls.audiourl") . "$name.$extension";
                 return Code::response(0, $model->toArray());
             }else{
                 return Code::response(404, "保存失败");

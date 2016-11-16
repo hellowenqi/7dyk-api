@@ -90,7 +90,7 @@ class CourseController extends Controller{
                 }
                 if($mark) $marked = true;
                 $data = $model->toArray();
-                $data['audio'] = Config::get("urls.apiurl") . 'audio/' . $data['audio'];
+                $data['audio'] = Config::get("urls.audiourl") . $data['audio'];
                 return Code::response(0, array_merge($data, ['viewed'=>$viewed, 'marked'=>$marked, "marks" =>$marks]));
             }else{
                 return Code::response(404, "没有购买课程，不能查看");
