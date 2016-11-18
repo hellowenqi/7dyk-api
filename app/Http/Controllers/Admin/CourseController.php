@@ -110,7 +110,7 @@ class CourseController extends Controller {
         $number = Request::get("number");
         if($page && $number){
             $index = ($page - 1) * $number;
-            $pays = CoursePay::with('user')->skip($index)->take($number)->get();
+            $pays = CoursePay::with('user')->take($number)->skip($index)->get();
             $datas = array();
             $data = array();
             foreach ($pays as $item){

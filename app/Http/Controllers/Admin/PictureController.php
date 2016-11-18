@@ -9,14 +9,18 @@ use Config;
 
 class PictureController extends Controller {
     public function index(){
-        $page = Request::get("page");
-        $number = Request::get("number");
+        $page = intval(Request::get("page"));
+        $number = intval(Request::get("number"));
         if($page && $number){
+            $data = [];
             $index = ($page - 1) * $number;
-            $data = Picture::skip($index)->take($number)->get()->toArray();
-            foreach ($data as &$item){
+            $data['datas'] = Picture::skip($index)->take($number)->get()->toArray();
+            foreach ($data['datas'] as &$item){
                 $item['path'] = Config::get('urls.picUrl') . "/" . $item['path'];
             }
+            $data['page'] = $page;
+            $data['number'] = $number;
+            $data['total'] = Picture::count();
             return Code::response(0, $data);
         }else{
             return Code::response(100);

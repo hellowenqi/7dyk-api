@@ -18,7 +18,7 @@ use App\Wechat\WxPayUnifiedOrder;
 class CourseController extends Controller{
     //用户详情
     public function userInfo(){
-        $user_id = Session::get("user_id") | 30;;
+        $user_id = Session::get("user_id");
         $isPaid = CoursePay::select('course_id')->where("user_id", $user_id)->get()->toArray();
         $model = User::find($user_id)->toArray();
         return Code::response(0, array_merge($model, ["isPaid" => $isPaid]));
@@ -37,7 +37,7 @@ class CourseController extends Controller{
         $course_id = Request::get("course_id");
         //查看用户是否付过款
         $flag = false;
-        $user_id = Session::get("user_id") | 30;
+        $user_id = Session::get("user_id");
         if(CoursePay::where("user_id", $user_id)->where('course_id', $course_id)->first()){
             $flag = true;
         }
@@ -62,7 +62,7 @@ class CourseController extends Controller{
         if($model){
             //鉴权
             $course_id = $model->course->id;
-            $user_id =  Session::get("user_id") | 30;
+            $user_id =  Session::get("user_id");
             if($model->is_free == 1 || CoursePay::where("course_id", $course_id)->where("user_id", $user_id)->first()){
                 $view = View::where("user_id", $user_id)->where("chapter_id", $id)->first();
                 $mark = Mark::where("user_id", $user_id)->where("chapter_id", $id)->first();
@@ -103,7 +103,7 @@ class CourseController extends Controller{
     public function chapterMark($id){
         $chapter = Chapter::find($id);
         if($chapter){
-            $user_id = Session::get("user_id") | 30;
+            $user_id = Session::get("user_id");
             $mark = Mark::where("user_id", $user_id)->where("chapter_id", $id)->first();
             if($mark == null){
                 $mark = new Mark();
@@ -130,7 +130,7 @@ class CourseController extends Controller{
     //支付
     public function pay(){
         $course_id = Request::get("course_id");
-        $user_id = Session::get("user_id") | 30;
+        $user_id = Session::get("user_id");
         if(CoursePay::where("user_id", $user_id)->where("course_id", $course_id)->first()){
             return Code::response(404, "该课程已经付过款了");
         }
@@ -142,9 +142,8 @@ class CourseController extends Controller{
             $name = md5("{$user_id}{$time}");
             $price = (int)($model->price_now * 100);
             $tools = new JsApiPay();
-            //$openid = Session::get('openid');
+            $openid = Session::get('openid');
 //            $openid = "on7OgwizVILjdisVtqsEhkU3WRRE";
-            $openid = "on7Ogwj04PIfSCxa2ypeMrGuvAGU";
             $input = new WxPayUnifiedOrder();
             $input->SetBody("购买课程【".$model->title."】");
             $input->SetAttach($name);

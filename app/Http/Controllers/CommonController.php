@@ -12,8 +12,8 @@ class CommonController extends Controller{
         $user_id = Session::get('user_id');
         $adminId = Session::get("adminId");
         if($user_id){  //手机端用户
-            $model = Chapter::where("audio", $name)->one();
-            if($model && $user_id = CoursePay::where('course_id', $model->course_id)->where("user_id", $user_id)->one()){
+            $model = Chapter::where("audio", $name)->first();
+            if($model && $user_id = CoursePay::where('course_id', $model->course_id)->where("user_id", $user_id)->first()){
                 $flag = true;
             }
         }elseif ($adminId){
