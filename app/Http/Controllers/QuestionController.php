@@ -8,6 +8,7 @@ use App\Models\Teacher;
 use App\Models\User;
 use App\Models\Listen;
 use App\Models\Like;
+use App\Models\Hot;
 use App\Code;
 use App\Wechat;
 use App\Wechat\WxPayConfig;
@@ -71,6 +72,11 @@ class QuestionController extends Controller
                 $query3->whereHas('question', function ($query) use ($search) {
                     $query->where('content', 'like', "%$search%");
                 });
+		$hot_model = Hot::where("category", 1)->where("search", $search)->first();
+                if($hot_model){
+                        $hot_model->times += 1;
+                        $hot_model->save();
+                }
             }
             //根据order返回位置
             //本次排过序的

@@ -92,7 +92,7 @@ class Wechat extends BaseModel {
         return $response;
     }
 
-    public function getOpenid($code) {
+    public function getOpenid1($code) {
         if(Cache::has('openid')) {
             $openid = Cache::get('openid');
             return $openid;
@@ -112,11 +112,37 @@ class Wechat extends BaseModel {
         $response = json_decode($curl->response);
 
         Cache::put('access_token', $response->access_token, 110);
-        Cache::put('opneid', $response->openid, 110);
+        Cache::put('openid', $response->openid, 110);
         //这里没有用到refresh_token,用户量大以后可以使用
 
         return $response->openid;
     }
+    public function getOpenid($code) {
+        if(Session::has('openid')) {
+            $openid = Session::get('openid');
+            return $openid;
+        }
+        $appid = $this->appId;
+        $appsecret = $this->appSecret;
+        $curl = new Curl();
+        $code_url = "https://api.weixin.qq.com/sns/oauth2/access_token";
+
+        //取得token
+        $curl->get($code_url, array(
+            'appid'         =>  $appid,
+            'secret'        =>  $appsecret,
+            'code'          =>  $code,
+            'grant_type'    =>  'authorization_code',
+        ));
+        $response = json_decode($curl->response);
+
+        Session::put('access_token', $response->access_token, 110);
+        Session::put('openid', $response->openid, 110);
+        //这里没有用到refresh_token,用户量大以后可以使用
+
+        return $response->openid;
+    }
+
 
     public function getUserinfo($access_token, $openid) {
         $curl = new Curl();

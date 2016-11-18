@@ -12,7 +12,7 @@ use Request;
 use Redirect;
 use Cache;
 use DB;
-
+use App\Models\Hot;
 
 class UserController extends Controller {
 
@@ -53,6 +53,11 @@ class UserController extends Controller {
                             ->orWhere('position', 'like', "%$search%");
                     });
                 });
+		$hot_model = Hot::where("category", 2)->where("search", $search)->first();
+		if($hot_model){
+			$hot_model->times += 1;
+			$hot_model->save();
+		}
             }
             //排过序的导师
             $queryOrdered = $query1->where('order', '>', $index)->where('order', '<=', $index + $number);
@@ -313,7 +318,7 @@ class UserController extends Controller {
                 Session::put('user_id', $user->id);
                 Session::put('openid', $user->openid);
             } else {
-                $access_token = Cache::get('access_token');
+                $access_token = Session::get('access_token');
                 $info = $wechat->getUserinfo($access_token, $openid);
                 $user = new User;
                 $user->face = $info->headimgurl;

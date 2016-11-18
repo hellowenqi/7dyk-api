@@ -22,7 +22,9 @@
 //use Config;
 
 Route::get('/', 'WelcomeController@index');
-
+Route::get('/test', function(){
+    var_dump($_COOKIE["laravel_session"]);
+});
 Route::get('home', 'HomeController@index');
 Route::post('question', 'QuestionController@index');
 //手机端API

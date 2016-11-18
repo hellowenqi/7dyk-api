@@ -60,6 +60,10 @@ class PictureController extends Controller {
         if($picture_model){
             $data =  $picture_model->toArray();
             $data['path'] = Config::get('urls.picUrl') . $data['path'];
+            if(Request::has('desc')) {
+                $picture_model->desc = Request::get("desc");
+                $picture_model->save();
+            }
             return Code::response(0, $data);
         }
         $model = new Picture();
